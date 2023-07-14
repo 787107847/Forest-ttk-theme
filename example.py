@@ -46,19 +46,21 @@ f = tk.BooleanVar()
 g = tk.DoubleVar(value=75.0)
 h = tk.BooleanVar()
 
-# Create a Frame for the Checkbuttons
-check_frame = ttk.LabelFrame(root, text="Checkbuttons", padding=(20, 10))
-check_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
+# Frame para Búsqueda de productos
+input_busqueda_frame = ttk.LabelFrame(root, text="Búsqueda de productos", padding=(20, 10))
+input_busqueda_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="ns")
 
 # Checkbuttons
-check_1 = ttk.Checkbutton(check_frame, text="Unchecked", variable=a)
-check_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
-check_2 = ttk.Checkbutton(check_frame, text="Checked", variable=b)
+entry = ttk.Entry(input_busqueda_frame)
+entry.insert(0, "Entry")
+entry.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ns")
+
+check_2 = ttk.Checkbutton(input_busqueda_frame, text="Checked", variable=b)
 check_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
-check_3 = ttk.Checkbutton(check_frame, text="Third state", variable=c)
+check_3 = ttk.Checkbutton(input_busqueda_frame, text="Third state", variable=c)
 check_3.state(["alternate"])
 check_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
-check_4 = ttk.Checkbutton(check_frame, text="Disabled", state="disabled")
+check_4 = ttk.Checkbutton(input_busqueda_frame, text="Disabled", state="disabled")
 check_4.state(["disabled !alternate"])
 check_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
 

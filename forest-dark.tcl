@@ -15,7 +15,7 @@ namespace eval ttk::theme::forest-dark {
         -disabledfg     "#595959"
         -disabledbg     "#ffffff"
         -selectfg       "#ffffff"
-        -selectbg       "#217346"
+        -selectbg       "#005b9d"
     }
 
     proc LoadImages {imgdir} {
@@ -418,7 +418,7 @@ namespace eval ttk::theme::forest-dark {
                 disabled $I(border-basic) \
                 focus $I(border-accent) \
                 hover $I(border-hover) \
-            ] -border 5 -padding {8} -sticky nsew
+            ] -border 5 -padding {8} -sticky nsew 
 
         # Combobox
         ttk::style map TCombobox -selectbackground [list \
