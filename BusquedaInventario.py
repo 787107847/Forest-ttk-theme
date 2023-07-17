@@ -20,7 +20,12 @@ style.theme_use("forest-dark")
 
 # Create lists for the Comboboxes
 option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
-combo_list = ["Capacidad", "4"+" GB", "8"+" GB","12"+" GB","ETC"]
+combo_list = ["Capacidad", "4"+" GB", "8"+" GB","12"+" GB","etc"]
+combo_list1 = ["Marca", "Lenovo", "HP","DELL","ACER","etc"]
+combo_list2 = ["Modelo","ThinkPad","Latitude","IdeaPad Gaming","Aspire","etc"]
+combo_list3 = ["TIPO","SSD","HDD",""]
+combo_list4 = ["Factor de forma","SATA","M.2","PCIe","etc"]
+combo_list5 = []
 readonly_combo_list = ["Readonly combobox", "Item 1", "Item 2"]
 
 # Create control variables
@@ -99,27 +104,7 @@ treeview_data = [
     (1, "end", 2, "Child", ("Subitem 1.1", "Value 1.1")),
     (1, "end", 3, "Child", ("Subitem 1.2", "Value 1.2")),
     (1, "end", 4, "Child", ("Subitem 1.3", "Value 1.3")),
-    (1, "end", 5, "Child", ("Subitem 1.4", "Value 1.4")),
-    ("", "end", 6, "Parent", ("Item 2", "Value 2")),
-    (6, "end", 7, "Child", ("Subitem 2.1", "Value 2.1")),
-    (6, "end", 8, "Sub-parent", ("Subitem 2.2", "Value 2.2")),
-    (8, "end", 9, "Child", ("Subitem 2.2.1", "Value 2.2.1")),
-    (8, "end", 10, "Child", ("Subitem 2.2.2", "Value 2.2.2")),
-    (8, "end", 11, "Child", ("Subitem 2.2.3", "Value 2.2.3")),
-    (6, "end", 12, "Child", ("Subitem 2.3", "Value 2.3")),
-    (6, "end", 13, "Child", ("Subitem 2.4", "Value 2.4")),
-    ("", "end", 14, "Parent", ("Item 3", "Value 3")),
-    (14, "end", 15, "Child", ("Subitem 3.1", "Value 3.1")),
-    (14, "end", 16, "Child", ("Subitem 3.2", "Value 3.2")),
-    (14, "end", 17, "Child", ("Subitem 3.3", "Value 3.3")),
-    (14, "end", 18, "Child", ("Subitem 3.4", "Value 3.4")),
-    ("", "end", 19, "Parent", ("Item 4", "Value 4")),
-    (19, "end", 20, "Child", ("Subitem 4.1", "Value 4.1")),
-    (19, "end", 21, "Sub-parent", ("Subitem 4.2", "Value 4.2")),
-    (21, "end", 22, "Child", ("Subitem 4.2.1", "Value 4.2.1")),
-    (21, "end", 23, "Child", ("Subitem 4.2.2", "Value 4.2.2")),
-    (21, "end", 24, "Child", ("Subitem 4.2.3", "Value 4.2.3")),
-    (19, "end", 25, "Child", ("Subitem 4.3", "Value 4.3"))
+    (1, "end", 5, "Child", ("Subitem 1.4", "Value 1.4"))
     ]
 
 
@@ -142,9 +127,9 @@ entry1 = ttk.Entry(input_valor_1)
 entry1.insert(0, "N° Item")
 entry1.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry2 = ttk.Entry(input_valor_1)
-entry2.insert(0, "Stock Auto")
-entry2.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+spinbox = ttk.Spinbox(input_valor_1, from_=0, to=100)
+spinbox.insert(0, "Stock")
+spinbox.grid(row=1, column=0, padx=(5,1), pady=(0,0), sticky="ew")
 
 entry3 = ttk.Entry(input_valor_1)
 entry3.insert(0, "Costo")
@@ -155,14 +140,13 @@ entry4.insert(0, "Proveedor")
 entry4.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 entry5 = ttk.Entry(input_valor_1)
-entry5.insert(0, "Fecha de Recibido")
+entry5.insert(0, "N° de serie")
 entry5.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
 input_valor_2 = ttk.LabelFrame(tab_2, text="RAM", padding=(20, 10))
 input_valor_2.grid(row=0, column=1, padx=(20, 10), pady=(20, 10), sticky="ns")
 
-# Entry widgets
 # Combobox"
 combobox = ttk.Combobox(input_valor_2, values=combo_list)
 combobox.current(0)
@@ -185,54 +169,66 @@ entry10.insert(0, "Maximo de ram")
 entry10.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_3 = ttk.LabelFrame(tab_2, text="Componentes", padding=(20, 10))
+input_valor_3 = ttk.LabelFrame(tab_2, text="Marca y Modelo", padding=(20, 10))
 input_valor_3.grid(row=0, column=3, padx=(20, 10), pady=(20, 10), sticky="ns")
 
 # Entry widgets
-entry11 = ttk.Entry(input_valor_3)
-entry11.insert(0, "N° Item")
-entry11.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+combobox = ttk.Combobox(input_valor_3, values=combo_list1)
+combobox.current(0)
+combobox.grid(row=1, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
 
-entry12 = ttk.Entry(input_valor_3)
-entry12.insert(0, "N° Item")
-entry12.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+combobox = ttk.Combobox(input_valor_3, values=combo_list2)
+combobox.current(0)
+combobox.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
 
 entry13 = ttk.Entry(input_valor_3)
-entry13.insert(0, "N° Item")
-entry13.grid(row=2, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry13.insert(0, "Linea")
+entry13.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 entry14 = ttk.Entry(input_valor_3)
-entry14.insert(0, "N° Item")
-entry14.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
-
-entry15 = ttk.Entry(input_valor_3)
-entry15.insert(0, "N° Item")
-entry15.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry14.insert(0, "N° producto")
+entry14.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_4 = ttk.LabelFrame(tab_2, text="Componentes", padding=(20, 10))
+input_valor_4 = ttk.LabelFrame(tab_2, text="Almacenamiento", padding=(20, 10))
 input_valor_4.grid(row=0, column=4, padx=(20, 10), pady=(20, 10), sticky="ns")
 
 # Entry widgets
-entry16 = ttk.Entry(input_valor_4)
-entry16.insert(0, "N° Item")
-entry16.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+combobox = ttk.Combobox(input_valor_4, values=combo_list3)
+combobox.current(0)
+combobox.grid(row=0, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
 
 entry17 = ttk.Entry(input_valor_4)
-entry17.insert(0, "N° Item")
+entry17.insert(0, "Capacidad")
 entry17.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry18 = ttk.Entry(input_valor_4)
-entry18.insert(0, "N° Item")
-entry18.grid(row=2, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+combobox = ttk.Combobox(input_valor_4, values=combo_list4)
+combobox.current(0)
+combobox.grid(row=0, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
 
 entry19 = ttk.Entry(input_valor_4)
-entry19.insert(0, "N° Item")
+entry19.insert(0, "Especificación")
 entry19.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry14 = ttk.Entry(input_valor_4)
-entry14.insert(0, "N° Item")
-entry14.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+# Frame para Ingreso de Valores de la máquina
+input_valor_5 = ttk.LabelFrame(tab_2, text="Procesador", padding=(20, 10))
+input_valor_5.grid(row=1, column=0, padx=(20, 10), pady=(20, 10), sticky="ns")
+
+entry20 = ttk.Entry(input_valor_5)
+entry20.insert(0, "Nombre Procesador")
+entry20.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry21 = ttk.Entry(input_valor_5)
+entry21.insert(0, "Núcleos")
+entry21.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry21 = ttk.Entry(input_valor_5)
+entry21.insert(0, "Generación")
+entry21.grid(row=2, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry21 = ttk.Entry(input_valor_5)
+entry21.insert(0, "Velocidad CPU")
+entry21.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 
 # Tab #3
