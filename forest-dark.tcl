@@ -510,11 +510,6 @@ namespace eval ttk::theme::forest-dark {
         ttk::style element create Treeview.field image $I(card) \
             -border 5
 
-        ttk::style element create Treeheading.cell image \
-            [list $I(tree-basic) \
-                pressed $I(tree-pressed)
-            ] -border 5 -padding 6 -sticky nsew
-        
         ttk::style element create Treeitem.indicator image \
             [list $I(right) \
                 user2 $I(empty) \
