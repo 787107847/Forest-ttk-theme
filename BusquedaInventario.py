@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 def on_canvas_configure(event):
     canvas_tab_2.configure(scrollregion=canvas_tab_2.bbox("all"))
@@ -20,11 +21,38 @@ def resize(event):
 
 def validate_entry():
     for entry in entry_list:
-        print(entry)
-        if entry.get() == "":
+        if entry.get() == "" or entry.get() == " ":
             entry.state(["invalid"])
         else:
             entry.state(["!invalid"])
+
+
+def check_fields():
+    # Lista de Combobox que se deben verificar
+    combo_list = [readonly_combo, readonly_combo3, readonly_combo4, readonly_combo5, readonly_combo6,
+                  readonly_combo7, readonly_combo8, readonly_combo9, readonly_combo10, readonly_combo11,
+                  readonly_combo12, readonly_combo13, readonly_combo14, readonly_combo15, readonly_combo16,
+                  readonly_combo17, readonly_combo18, readonly_combo19, readonly_combo20]
+
+def update_combobox_values(event):
+    combo = event.widget
+    text = combo.get()
+    values = combo_values_dict.get(combo)
+    filtered_values = [value for value in values if text.lower() in value.lower()]
+    combo.configure(values=filtered_values)
+
+
+    # Verificar combobox en la posición [0]
+    for combo in combo_list:
+        if combo.get() == "" or combo.current() == 0:
+            # Mostrar cuadro de diálogo con las opciones "Modificar" o "Continuar"
+            result = messagebox.askquestion("Combobox vacío o en posición [0]. ", "El combobox "+ combo.get() + " está vacío o en posición [0]. ¿Desea modificar el campo?")
+            if result == 'yes':
+                # Si el usuario elige "Modificar", retornar y permitir que modifique los campos
+                return
+
+    # Si no se encontraron problemas, mostrar un mensaje de éxito
+    messagebox.showinfo("Todo listo", "Configuración aceptada")
 
 root = tk.Tk()
 root.title("UltraPC")
@@ -38,21 +66,22 @@ root.rowconfigure(0, weight=1)
 style = ttk.Style(root)
 
 # Import the tcl file
-root.tk.call("source", "forest-dark.tcl")
+root.tk.call("source", "forest-light.tcl")
 
 # Set the theme with the theme_use method
-style.theme_use("forest-dark")
+style.theme_use("forest-light")
 
 # Create lists for the Comboboxes
 option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
 combo_list = ["Capacidad", "4"+" GB", "8"+" GB","12"+" GB","etc"]
 combo_list1 = ["Marca", "Lenovo", "HP","DELL","ACER","etc"]
 combo_list2 = ["Linea","ThinkPad","Latitude","IdeaPad Gaming","Aspire","etc"]
-combo_list3 = ["TIPO","SSD","HDD",""]
+combo_list3 = ["Tipo Almacenamiento","SSD","HDD",""]
 combo_list4 = ["Factor de forma","SATA","M.2","PCIe","etc"]
-combo_list5 = ["Tipo","Interna","Externa"]
+combo_list5 = ["Tipo batería","Interna","Externa"]
 combo_list6= ["","SI","NO",""]
 combo_list7 = ["Panel","LED IPS","Retina","LED TN","etc"]
+combo_list8 = ["Condición","Nuevo","OpenBox","Usado - Nuevo","Usado - Bueno","Usado","Dañado",""]
 
 # Crear notebook
 notebook = ttk.Notebook(root)
@@ -149,40 +178,49 @@ label_frames = []
 input_valor_1 = ttk.LabelFrame(frame_contenedor, text="Valores principales", padding=(20, 10))
 label_frames.append(input_valor_1)
 
+# Lista de Entry
 entry_list = []
 
+#Lista de valores de Combobox
+combo_values_dict = {}
+
 # Entry widgets
-entry1 = ttk.Entry(input_valor_1)
-entry1.insert(0, "N° Item")
-entry1.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry0 = ttk.Entry(input_valor_1,width=0)
+entry0.insert(0, "N° Item")
+entry0.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry1 = ttk.Entry(input_valor_1,width=18)
+entry1.insert(0, "Fecha de fabricación")
+entry1.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 
-spinbox = ttk.Spinbox(input_valor_1, from_=0, to=100)
+spinbox = ttk.Spinbox(input_valor_1, from_=0, to=100,width=0)
 spinbox.insert(0, "Stock")
-spinbox.grid(row=1, column=0, padx=(5,1), pady=(0,0), sticky="ew")
+spinbox.grid(row=2, column=0, padx=(5,1), pady=(0,0), sticky="ew")
 
-entry3 = ttk.Entry(input_valor_1)
+entry3 = ttk.Entry(input_valor_1,width=0)
 entry3.insert(0, "Costo")
-entry3.grid(row=2, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry3.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 
-entry4 = ttk.Entry(input_valor_1)
+entry4 = ttk.Entry(input_valor_1,width=0)
 entry4.insert(0, "Proveedor")
-entry4.grid(row=3, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry4.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 
-entry5 = ttk.Entry(input_valor_1)
+entry5 = ttk.Entry(input_valor_1,width=0)
 entry5.insert(0, "N° de serie")
-entry5.grid(row=4, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+entry5.grid(row=5, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
 input_valor_2 = ttk.LabelFrame(frame_contenedor, text="RAM", padding=(20, 10))
 label_frames.append(input_valor_2)
 
 # Combobox"
-combobox = ttk.Combobox(input_valor_2, values=combo_list)
-combobox.current(0)
-combobox.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
+combobox0 = ttk.Combobox(input_valor_2, values=combo_list)
+combobox0.current(0)
+combobox0.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
+combo_values_dict[combobox0] = combo_list
 
 entry7 = ttk.Entry(input_valor_2)
 entry7.insert(0, "Tipo")
@@ -206,13 +244,15 @@ input_valor_3 = ttk.LabelFrame(frame_contenedor, text="Marca y Modelo", padding=
 label_frames.append(input_valor_3)
 
 # Entry widgets
-combobox = ttk.Combobox(input_valor_3, values=combo_list1)
-combobox.current(0)
-combobox.grid(row=1, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combobox1 = ttk.Combobox(input_valor_3, values=combo_list1)
+combobox1.current(0)
+combobox1.grid(row=1, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combo_values_dict[combobox1] = combo_list1
 
-combobox = ttk.Combobox(input_valor_3, values=combo_list2)
-combobox.current(0)
-combobox.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combobox2 = ttk.Combobox(input_valor_3, values=combo_list2)
+combobox2.current(0)
+combobox2.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combo_values_dict[combobox2] = combo_list2
 
 entry13 = ttk.Entry(input_valor_3)
 entry13.insert(0, "Modelo")
@@ -227,17 +267,19 @@ input_valor_4 = ttk.LabelFrame(frame_contenedor, text="Almacenamiento", padding=
 label_frames.append(input_valor_4)
 
 # Entry widgets
-combobox = ttk.Combobox(input_valor_4, values=combo_list3)
-combobox.current(0)
-combobox.grid(row=0, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combobox3 = ttk.Combobox(input_valor_4, values=combo_list3)
+combobox3.current(0)
+combobox3.grid(row=0, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combo_values_dict[combobox3] = combo_list3
 
 entry17 = ttk.Entry(input_valor_4)
 entry17.insert(0, "Capacidad")
 entry17.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
-combobox = ttk.Combobox(input_valor_4, values=combo_list4)
-combobox.current(0)
-combobox.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combobox4 = ttk.Combobox(input_valor_4, values=combo_list4)
+combobox4.current(0)
+combobox4.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combo_values_dict[combobox4] = combo_list4
 
 entry19 = ttk.Entry(input_valor_4)
 entry19.insert(0, "Especificación")
@@ -309,16 +351,6 @@ spinbox = ttk.Spinbox(input_valor_7, from_=0, to=100, width=10)
 spinbox.insert(0, "% Uso")
 spinbox.grid(row=3, column=0, padx=(5,1), pady=(0,0), sticky="ew")
 
-combo_list6[0] = "Webcam"
-readonly_combo2 = ttk.Combobox(input_valor_7, state="readonly", values=combo_list6)
-readonly_combo2.current(0)
-readonly_combo2.grid(row=5, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
-
-entry32 = ttk.Entry(input_valor_7, width=15)
-entry32.insert(0, "Posición Webcam")
-entry32.grid(row=6, column=0,padx=(5, 0), pady=(5, 0), sticky="ew")
-
-
 # Frame para Ingreso de Valores de la máquina
 input_valor_8 = ttk.LabelFrame(frame_contenedor, text="Pantalla", padding=(20, 10))
 label_frames.append(input_valor_8)
@@ -338,9 +370,10 @@ entry34.insert(0, "Resolución Pantalla")
 entry34.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Entry widgets
-combobox = ttk.Combobox(input_valor_8, values=combo_list7)
-combobox.current(0)
-combobox.grid(row=3, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combobox5 = ttk.Combobox(input_valor_8, values=combo_list7)
+combobox5.current(0)
+combobox5.grid(row=3, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
+combo_values_dict[combobox5] = combo_list7
 
 entry35 = ttk.Entry(input_valor_8, width=0)
 entry35.insert(0, "Hercios Pantalla")
@@ -383,7 +416,7 @@ readonly_combo7.current(0)
 readonly_combo7.grid(row=4, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_10 = ttk.LabelFrame(frame_contenedor, text="Puertos - 1", padding=(20, 10))
+input_valor_10 = ttk.LabelFrame(frame_contenedor, text="Puertos-1", padding=(20, 10))
 label_frames.append(input_valor_10)
 
 spinbox2 = ttk.Spinbox(input_valor_10, from_=0, to=100, width=20)
@@ -441,49 +474,173 @@ readonly_combo15.grid(row=4, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
 
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_12 = ttk.LabelFrame(frame_contenedor, text="Caja", padding=(20, 10))
+input_valor_12 = ttk.LabelFrame(frame_contenedor, text="Cargador y accesorios", padding=(20, 10))
 label_frames.append(input_valor_12)
 
-entry38 = ttk.Entry(input_valor_12, width=15)
-entry38.insert(0, "-")
-entry38.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+combo_list6[0] = "Webcam"
+readonly_combo15 = ttk.Combobox(input_valor_12, state="readonly", values=combo_list6)
+readonly_combo15.current(0)
+readonly_combo15.grid(row=0, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
+
+entry39 = ttk.Entry(input_valor_12, width=15)
+entry39.insert(0, "Posición Webcam")
+entry39.grid(row=1, column=0,padx=(5, 0), pady=(5, 0), sticky="ew")
+
+entry40 = ttk.Entry(input_valor_12, width=15)
+entry40.insert(0, "Descripción Webcam")
+entry40.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+combo_list6[0] = "Cargador Original"
+readonly_combo16 = ttk.Combobox(input_valor_12, state="readonly", values=combo_list6)
+readonly_combo16.current(0)
+readonly_combo16.grid(row=3, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
+
+entry41 = ttk.Entry(input_valor_12, width=15)
+entry41.insert(0, "Alimentación de Cargador")
+entry41.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry41 = ttk.Entry(input_valor_12, width=15)
+entry41.insert(0, "Alimentación de Cargador")
+entry41.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry42 = ttk.Entry(input_valor_12, width=15)
+entry42.insert(0, "Accesorios")
+entry42.grid(row=5, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_13 = ttk.LabelFrame(frame_contenedor, text="Material", padding=(20, 10))
+input_valor_13 = ttk.LabelFrame(frame_contenedor, text="Material y otros componentes", padding=(20, 10))
 label_frames.append(input_valor_13)
 
-entry39 = ttk.Entry(input_valor_13, width=15)
-entry39.insert(0, "-")
-entry39.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry43 = ttk.Entry(input_valor_13, width=15)
+entry43.insert(0, "Material de Construcción")
+entry43.grid(row=0, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+combo_list6[0] = "Cumple norma STD"
+readonly_combo17 = ttk.Combobox(input_valor_13, state="readonly", values=combo_list6)
+readonly_combo17.current(0)
+readonly_combo17.grid(row=1, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
+
+spinbox4 = ttk.Spinbox(input_valor_13, from_=0, to=100, width=18)
+spinbox4.insert(0, "Peso")
+spinbox4.grid(row=2, column=0, padx=(5,0), pady=(5,0), sticky="ew")
+
+combo_list6[0] = "Wifi"
+readonly_combo18 = ttk.Combobox(input_valor_13, state="readonly", values=combo_list6)
+readonly_combo18.current(0)
+readonly_combo18.grid(row=3, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
+
+combo_list6[0] = "BlueTooth"
+readonly_combo19 = ttk.Combobox(input_valor_13, state="readonly", values=combo_list6)
+readonly_combo19.current(0)
+readonly_combo19.grid(row=4, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
+
+combo_list6[0] = "4G"
+readonly_combo20 = ttk.Combobox(input_valor_13, state="readonly", values=combo_list6)
+readonly_combo20.current(0)
+readonly_combo20.grid(row=5, column=0, padx=(5,0), pady=(5,0),  sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_14 = ttk.LabelFrame(frame_contenedor, text="Cargador y accesorios", padding=(20, 10))
+input_valor_14 = ttk.LabelFrame(frame_contenedor, text="Caja", padding=(20, 10))
 label_frames.append(input_valor_14)
 
+spinbox5 = ttk.Spinbox(input_valor_14, from_=0, to=100, width=18)
+spinbox5.insert(0, "Ancho")
+spinbox5.grid(row=0, column=0, padx=(5,0), pady=(5,0), sticky="ew")
+
+spinbox6 = ttk.Spinbox(input_valor_14, from_=0, to=100, width=18)
+spinbox6.insert(0, "Largo")
+spinbox6.grid(row=1, column=0, padx=(5,0), pady=(5,0), sticky="ew")
+
+spinbox7 = ttk.Spinbox(input_valor_14, from_=0, to=100, width=18)
+spinbox7.insert(0, "Alto")
+spinbox7.grid(row=2, column=0, padx=(5,0), pady=(5,0), sticky="ew")
+
+spinbox8 = ttk.Spinbox(input_valor_14, from_=0, to=100, width=18)
+spinbox8.insert(0, "Peso de la caja")
+spinbox8.grid(row=3, column=0, padx=(5,0), pady=(5,0), sticky="ew")
+
 entry40 = ttk.Entry(input_valor_14, width=15)
-entry40.insert(0, "-")
-entry40.grid(row=2, column=3,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry40.insert(0, "Apto para envío")
+entry40.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
-input_valor_14 = ttk.LabelFrame(frame_contenedor, text="Garantía", padding=(20, 10))
-label_frames.append(input_valor_14)
+input_valor_15 = ttk.LabelFrame(frame_contenedor, text="Garantía", padding=(20, 10))
+label_frames.append(input_valor_15)
 
-entry40 = ttk.Entry(input_valor_14, width=15)
-entry40.insert(0, "-")
-entry40.grid(row=2, column=3,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry41 = ttk.Entry(input_valor_15, width=15)
+entry41.insert(0, "Oferente Garantía")
+entry41.grid(row=0, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
-# Configurar el sistema de gestión de geometría 'grid' para el tab_2
-tab_2.grid_rowconfigure(0, weight=1)
-tab_2.grid_columnconfigure(0, weight=1)
+spinbox9 = ttk.Spinbox(input_valor_15, from_=0, to=100, width=18)
+spinbox9.insert(0, "Tiempo de garantía")
+spinbox9.grid(row=1, column=0, padx=(5,0), pady=(5,0), sticky="ew")
 
-# Agregar los LabelFrame al contenedor principal
-for i, label_frame in enumerate(label_frames):
-    row = i // 4
-    column = i % 4
-    label_frame.grid(row=row, column=column, padx=(20, 10), pady=(20, 10), sticky="ns")
+entry42 = ttk.Entry(input_valor_15, width=15)
+entry42.insert(0, "Tipo Garantía")
+entry42.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry43 = ttk.Entry(input_valor_15, width=15)
+entry43.insert(0, "Comprobante de compra")
+entry43.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry44 = ttk.Entry(input_valor_15, width=15)
+entry44.insert(0, "Comentario Garantía")
+entry44.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+# Frame para Ingreso de Valores de la máquina
+input_valor_16 = ttk.LabelFrame(frame_contenedor, text="Condición", padding=(20, 10))
+label_frames.append(input_valor_16)
+
+combobox6 = ttk.Combobox(input_valor_16, values=combo_list8)
+combobox6.current(0)
+combobox6.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
+combo_values_dict[combobox6] = combo_list8
+
+entry46 = ttk.Entry(input_valor_16, width=15)
+entry46.insert(0, "Condición Touch")
+entry46.grid(row=1, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry47 = ttk.Entry(input_valor_16, width=15)
+entry47.insert(0, "Condición Teclado")
+entry47.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry48 = ttk.Entry(input_valor_16, width=15)
+entry48.insert(0, "Condición Reposamuñecas")
+entry48.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry49 = ttk.Entry(input_valor_16, width=15)
+entry49.insert(0, "Condición Tapa")
+entry49.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry50 = ttk.Entry(input_valor_16, width=15)
+entry50.insert(0, "Condición Pantalla")
+entry50.grid(row=5, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry51 = ttk.Entry(input_valor_16, width=20)
+entry51.insert(0, "Otros comentarios")
+entry51.grid(row=6, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+# Frame para Ingreso de Valores de la máquina
+button_1 = ttk.LabelFrame(frame_contenedor, text="Botones", padding=(10, 5))
+label_frames.append(button_1)
+
+# Button widget
+button1 = ttk.Button(button_1, text="Validar",command=validate_entry)
+button1.grid(row=0, column=0, padx=5, pady=(0, 0), sticky="nse")  # Adjust sticky
+
+button2 = ttk.Button(button_1, text="Guardar",command=check_fields)
+button2.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nsw")  # Adjust sticky
+
 
 # Asociar el evento de cambio de tamaño de la ventana a la función resize
 root.bind('<Configure>', resize)
-entry_list = [globals().get(f"entry{i}") for i in range(1, 41) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
+combobox1.bind("<<ComboboxSelected>>", update_combobox_values)
+combobox2.bind("<<ComboboxSelected>>", update_combobox_values)
+combobox3.bind("<<ComboboxSelected>>", update_combobox_values)
+combobox4.bind("<<ComboboxSelected>>", update_combobox_values)
+combobox5.bind("<<ComboboxSelected>>", update_combobox_values)
+combobox6.bind("<<ComboboxSelected>>", update_combobox_values)
+entry_list = [globals().get(f"entry{i}") for i in range(0, 51) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
 
 root.mainloop()
