@@ -1,6 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from conexion import*
+
+root = tk.Tk()
+root.title("UltraPC")
+root.option_add("*tearOff", False)  # This is always a good idea
+
 
 def on_canvas_configure(event):
     canvas_tab_2.configure(scrollregion=canvas_tab_2.bbox("all"))
@@ -34,29 +40,38 @@ def check_fields():
                   readonly_combo12, readonly_combo13, readonly_combo14, readonly_combo15, readonly_combo16,
                   readonly_combo17, readonly_combo18, readonly_combo19, readonly_combo20]
 
-def update_combobox_values(event):
-    combo = event.widget
-    text = combo.get()
-    values = combo_values_dict.get(combo)
-    filtered_values = [value for value in values if text.lower() in value.lower()]
-    combo.configure(values=filtered_values)
-
-
-    # Verificar combobox en la posición [0]
     for combo in combo_list:
-        if combo.get() == "" or combo.current() == 0:
-            # Mostrar cuadro de diálogo con las opciones "Modificar" o "Continuar"
-            result = messagebox.askquestion("Combobox vacío o en posición [0]. ", "El combobox "+ combo.get() + " está vacío o en posición [0]. ¿Desea modificar el campo?")
-            if result == 'yes':
-                # Si el usuario elige "Modificar", retornar y permitir que modifique los campos
-                return
+        while True:
+            if combo.get() == "" or combo.current() == 0:
+                result = messagebox.askyesnocancel("Modificación de campo",
+                                                   f"El combobox {combo.get()} está vacío o en posición [0]. ¿Desea modificar el campo?\n\nResponda con:\n\n[Sí] para modificar el campo.\n[No] para dejar el campo sin modificar.\n[Cancelar] para no modificar ninguno de los campos.",
+                                                   icon='warning', default=messagebox.YES)
+                if result is None:
+                    # Si elige "Cancelar", guardar el cambio al instante y salir del bucle while
+                    messagebox.showinfo("Todo listo", "Configuración aceptada")
+                    return
+                elif result:
+                    # Si elige "Sí", permitir modificar el campo
+                    break
+                else:
+                    # Si elige "No", pasar al siguiente combo en la lista
+                    index = combo_list.index(combo)
+                    if index + 1 < len(combo_list):
+                        combo = combo_list[index + 1]
+                    else:
+                        # Si ya no hay más combos para verificar, guardar el cambio al instante y salir del bucle while
+                        messagebox.showinfo("Todo listo", "Configuración aceptada")
+                        return
+            else:
+                # Si el combo no está vacío y no es la posición [0], pasar al siguiente combo en la lista
+                index = combo_list.index(combo)
+                if index + 1 < len(combo_list):
+                    combo = combo_list[index + 1]
+                else:
+                    # Si ya no hay más combos para verificar, guardar el cambio al instante y salir del bucle while
+                    messagebox.showinfo("Todo listo", "Configuración aceptada")
+                    return
 
-    # Si no se encontraron problemas, mostrar un mensaje de éxito
-    messagebox.showinfo("Todo listo", "Configuración aceptada")
-
-root = tk.Tk()
-root.title("UltraPC")
-root.option_add("*tearOff", False)  # This is always a good idea
 
 # Make the app responsive
 root.columnconfigure(0, weight=1)
@@ -71,6 +86,10 @@ root.tk.call("source", "forest-light.tcl")
 # Set the theme with the theme_use method
 style.theme_use("forest-light")
 
+style.map("TCombobox", selectbackground=[("readonly", "#005b9d")], selectforeground=[("readonly", "#ffffff")], fieldbackground=[("readonly", "#ffffff")], foreground=[("readonly", "#ffffff")])
+style.map("TButton", background=[("!active", "#313131"), ("active", "#005b9d")], foreground=[("!active", "#ffffff"), ("active", "#ffffff")])
+
+
 # Create lists for the Comboboxes
 option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
 combo_list = ["Capacidad", "4"+" GB", "8"+" GB","12"+" GB","etc"]
@@ -79,7 +98,7 @@ combo_list2 = ["Linea","ThinkPad","Latitude","IdeaPad Gaming","Aspire","etc"]
 combo_list3 = ["Tipo Almacenamiento","SSD","HDD",""]
 combo_list4 = ["Factor de forma","SATA","M.2","PCIe","etc"]
 combo_list5 = ["Tipo batería","Interna","Externa"]
-combo_list6= ["","SI","NO",""]
+combo_list6= ["H","SI","NO",""]
 combo_list7 = ["Panel","LED IPS","Retina","LED TN","etc"]
 combo_list8 = ["Condición","Nuevo","OpenBox","Usado - Nuevo","Usado - Bueno","Usado","Dañado",""]
 
@@ -181,9 +200,6 @@ label_frames.append(input_valor_1)
 # Lista de Entry
 entry_list = []
 
-#Lista de valores de Combobox
-combo_values_dict = {}
-
 # Entry widgets
 entry0 = ttk.Entry(input_valor_1,width=0)
 entry0.insert(0, "N° Item")
@@ -220,7 +236,6 @@ label_frames.append(input_valor_2)
 combobox0 = ttk.Combobox(input_valor_2, values=combo_list)
 combobox0.current(0)
 combobox0.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
-combo_values_dict[combobox0] = combo_list
 
 entry7 = ttk.Entry(input_valor_2)
 entry7.insert(0, "Tipo")
@@ -246,13 +261,11 @@ label_frames.append(input_valor_3)
 # Entry widgets
 combobox1 = ttk.Combobox(input_valor_3, values=combo_list1)
 combobox1.current(0)
-combobox1.grid(row=1, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
-combo_values_dict[combobox1] = combo_list1
+combobox1.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 
 combobox2 = ttk.Combobox(input_valor_3, values=combo_list2)
 combobox2.current(0)
 combobox2.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
-combo_values_dict[combobox2] = combo_list2
 
 entry13 = ttk.Entry(input_valor_3)
 entry13.insert(0, "Modelo")
@@ -270,7 +283,6 @@ label_frames.append(input_valor_4)
 combobox3 = ttk.Combobox(input_valor_4, values=combo_list3)
 combobox3.current(0)
 combobox3.grid(row=0, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
-combo_values_dict[combobox3] = combo_list3
 
 entry17 = ttk.Entry(input_valor_4)
 entry17.insert(0, "Capacidad")
@@ -279,7 +291,6 @@ entry17.grid(row=1, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
 combobox4 = ttk.Combobox(input_valor_4, values=combo_list4)
 combobox4.current(0)
 combobox4.grid(row=2, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
-combo_values_dict[combobox4] = combo_list4
 
 entry19 = ttk.Entry(input_valor_4)
 entry19.insert(0, "Especificación")
@@ -373,7 +384,6 @@ entry34.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 combobox5 = ttk.Combobox(input_valor_8, values=combo_list7)
 combobox5.current(0)
 combobox5.grid(row=3, column=0,padx=(5, 1), pady=(0, 0),  sticky="ew")
-combo_values_dict[combobox5] = combo_list7
 
 entry35 = ttk.Entry(input_valor_8, width=0)
 entry35.insert(0, "Hercios Pantalla")
@@ -595,7 +605,6 @@ label_frames.append(input_valor_16)
 combobox6 = ttk.Combobox(input_valor_16, values=combo_list8)
 combobox6.current(0)
 combobox6.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
-combo_values_dict[combobox6] = combo_list8
 
 entry46 = ttk.Entry(input_valor_16, width=15)
 entry46.insert(0, "Condición Touch")
@@ -635,12 +644,7 @@ button2.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nsw")  # Adjust stick
 
 # Asociar el evento de cambio de tamaño de la ventana a la función resize
 root.bind('<Configure>', resize)
-combobox1.bind("<<ComboboxSelected>>", update_combobox_values)
-combobox2.bind("<<ComboboxSelected>>", update_combobox_values)
-combobox3.bind("<<ComboboxSelected>>", update_combobox_values)
-combobox4.bind("<<ComboboxSelected>>", update_combobox_values)
-combobox5.bind("<<ComboboxSelected>>", update_combobox_values)
-combobox6.bind("<<ComboboxSelected>>", update_combobox_values)
 entry_list = [globals().get(f"entry{i}") for i in range(0, 51) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
+
 
 root.mainloop()

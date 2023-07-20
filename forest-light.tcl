@@ -16,6 +16,7 @@ namespace eval ttk::theme::forest-light {
         -disabledbg     "#ffffff"
         -selectfg       "#ffffff"
         -selectbg       "#005b9d"
+        
     }
 
     proc LoadImages {imgdir} {
@@ -426,6 +427,7 @@ namespace eval ttk::theme::forest-light {
             ] -border 5 -padding {8} -sticky nsew
 
         # Combobox
+
         ttk::style map TCombobox -selectbackground [list \
             {!focus} $colors(-selectbg) \
             {readonly hover} $colors(-selectbg) \
@@ -461,7 +463,6 @@ namespace eval ttk::theme::forest-light {
             ] -border 5 -padding {2 6 6 6}
             
         ttk::style element create Combobox.arrow image $I(down) -width 15 -sticky e
-
         # Spinbox
         ttk::style element create Spinbox.field image \
             [list $I(border-basic) \
