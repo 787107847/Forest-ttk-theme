@@ -1,17 +1,20 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from conexion import*
+import uuid
+from conexion import Registro_datos
 
+# Create the main application window
 root = tk.Tk()
 root.title("UltraPC")
 root.option_add("*tearOff", False)  # This is always a good idea
 
 
-def on_canvas_configure(event):
-    canvas_tab_2.configure(scrollregion=canvas_tab_2.bbox("all"))
+def on_canvas_configure2(event):
+    canvas.configure(scrollregion=canvas.bbox("all"))
+    canvas_tab_2.configure(scrollregion=canvas_tab_2.bbox("all"))  # Add this line for tab_2
 
-def on_mousewheel(event):
+def on_mousewheel2(event):
     if canvas_tab_2.winfo_height() < content_frame_tab_2.winfo_height():
         canvas_tab_2.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
@@ -78,94 +81,185 @@ root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
 # Create a style
+# Apply the theme
 style = ttk.Style(root)
-
-# Import the tcl file
 root.tk.call("source", "forest-light.tcl")
-
-# Set the theme with the theme_use method
 style.theme_use("forest-light")
-
-style.map("TCombobox", selectbackground=[("readonly", "#005b9d")], selectforeground=[("readonly", "#ffffff")], fieldbackground=[("readonly", "#ffffff")], foreground=[("readonly", "#ffffff")])
+style.map("TCombobox", selectbackground=[("readonly", "#005b9d")], selectforeground=[("readonly", "#ffffff")],
+          fieldbackground=[("readonly", "#ffffff")], foreground=[("readonly", "#ffffff")])
 style.map("TButton", background=[("!active", "#313131"), ("active", "#005b9d")], foreground=[("!active", "#ffffff"), ("active", "#ffffff")])
-
 
 # Create lists for the Comboboxes
 option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
-combo_list = ["Capacidad", "4"+" GB", "8"+" GB","12"+" GB","etc"]
-combo_list1 = ["Marca", "Lenovo", "HP","DELL","ACER","etc"]
-combo_list2 = ["Linea","ThinkPad","Latitude","IdeaPad Gaming","Aspire","etc"]
-combo_list3 = ["Tipo Almacenamiento","SSD","HDD",""]
-combo_list4 = ["Factor de forma","SATA","M.2","PCIe","etc"]
-combo_list5 = ["Tipo batería","Interna","Externa"]
-combo_list6= ["H","SI","NO",""]
-combo_list7 = ["Panel","LED IPS","Retina","LED TN","etc"]
-combo_list8 = ["Condición","Nuevo","OpenBox","Usado - Nuevo","Usado - Bueno","Usado","Dañado",""]
+combo_list = ["Capacidad", "4 GB", "8 GB", "12 GB", "etc"]
+combo_list1 = ["Marca", "Lenovo", "HP", "DELL", "ACER", "etc"]
+combo_list2 = ["Linea", "ThinkPad", "Latitude", "IdeaPad Gaming", "Aspire", "etc"]
+combo_list3 = ["Tipo Almacenamiento", "SSD", "HDD", ""]
+combo_list4 = ["Factor de forma", "SATA", "M.2", "PCIe", "etc"]
+combo_list5 = ["Tipo batería", "Interna", "Externa"]
+combo_list6 = ["H", "SI", "NO", ""]
+combo_list7 = ["Panel", "LED IPS", "Retina", "LED TN", "etc"]
+combo_list8 = ["Condición", "Nuevo", "OpenBox", "Usado - Nuevo", "Usado - Bueno", "Usado", "Dañado", ""]
 
 # Crear notebook
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True)
 
+titulos_prints_list = [
+    "Descripción",
+    "Precio Original",
+    "Precio Actualizado",
+    "Tipo de Descuento",
+    "Valor de Descuento",
+    "Número de Serie",
+    "Capacidad de Almacenamiento",
+    "Tipo de RAM",
+    "Frecuencia de RAM",
+    "Gráfica",
+    "Sistema Operativo",
+    "Marca",
+    "Modelo",
+    "Alimentación del Cargador",
+    "Punta del Cargador",
+    "Tipo de Otro",
+    "Tamaño de Pantalla",
+    "Resolución de Pantalla",
+    "Idioma del Teclado",
+    "Retroiluminado del Teclado",
+    "Puerto CD",
+    "Puerto SD",
+    "Puerto Dock",
+    "Puerto Ethernet",
+    "Puerto HDMI",
+    "Puerto Hjack",
+    "Puerto VGA",
+    "Puerto Display",
+    "Cantidad de Puertos USB",
+    "Cantidad de Puertos TypeC"
+]
 
 # Contenido de la pestaña 1
 tab_1 = ttk.Frame(notebook)
 notebook.add(tab_1, text="Tab 1")
 
-# Create a Frame for the input_busqueda_frame
-input_busqueda_frame = ttk.LabelFrame(tab_1, text="Búsqueda de productos", padding=(20, 10))
-input_busqueda_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 0), sticky="ns")
+# Crear el canvas
+canvas = tk.Canvas(tab_1)
+canvas.pack(fill="both", expand=True)
 
+# Crear el árbol (Treeview)
+treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=20)
 
-# Configure expansion for input_busqueda_frame
-input_busqueda_frame.columnconfigure(0, weight=1)
-input_busqueda_frame.rowconfigure(0, weight=0)  # Set weight to 0 to prevent vertical expansion
-
-# Entry widget
-entryi = ttk.Entry(input_busqueda_frame)
-entryi.insert(0, "N° Item")
-entryi.grid(row=0, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")  # Adjust sticky to expand horizontally only
-
-# Button widget
-button = ttk.Button(input_busqueda_frame, text="Buscar")
-button.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nse")  # Adjust sticky
-
-# Create a Frame for the Treeview
-treeFrame = ttk.Frame(tab_1)
-treeFrame.grid(row=1, column=0, sticky="nsew")
-
-# Configure expansion for treeFrame
-treeFrame.columnconfigure(0, weight=1)
-treeFrame.rowconfigure(0, weight=1)
-
-# Scrollbar
-treeScroll = ttk.Scrollbar(treeFrame)
-treeScroll.pack(side="right", fill="y")
-
-# Treeview
-treeview = ttk.Treeview(treeFrame, selectmode="extended", yscrollcommand=treeScroll.set, columns=(1, 2), height=12)
-treeview.pack(expand=True, fill="both", padx=5, pady=5)
-treeScroll.config(command=treeview.yview)
 
 # Treeview headings
-treeview.heading("#0", text="Column 1", anchor="center")
-treeview.heading(1, text="Column 2", anchor="center")
-treeview.heading(2, text="Column 3", anchor="center")
-
-# Define treeview data
-treeview_data = [
-    ("", "end", 1, "Parent", ("Item 1", "Value 1")),
-    (1, "end", 2, "Child", ("Subitem 1.1", "Value 1.1")),
-    (1, "end", 3, "Child", ("Subitem 1.2", "Value 1.2")),
-    (1, "end", 4, "Child", ("Subitem 1.3", "Value 1.3")),
-    (1, "end", 5, "Child", ("Subitem 1.4", "Value 1.4"))
-    ]
+treeview.heading("#0", text="Item", anchor="center")
+for i in range(1, 31):
+    if i <= len(titulos_prints_list):
+        column_title = titulos_prints_list[i - 1]
+    else:
+        column_title = " "  # Espacio en blanco si no hay más elementos en la lista
+    treeview.heading(str(i), text=column_title, anchor="center")
 
 
-# Insert treeview data
+
+# Crear una instancia de la clase Registro_datos
+registro_datos = Registro_datos()
+
+# Llamar al método mostrar_productos usando la instancia creada
+datos_productos = registro_datos.mostrar_productos()
+
+# Define una función para transformar los datos del producto en el formato adecuado
+def transformar_producto(producto):
+    item = producto[0]
+    subitem = producto[1]
+    data_values = producto[2:]
+    return (None, "", "Item", ()), (item, "", "", (subitem,) + data_values)
+
+# Crear una lista para almacenar los datos en el formato del treeview
+treeview_data = []
+for producto in datos_productos:
+    treeview_data.extend(transformar_producto(producto))
+
+# Insert treeview data (incluir 10 valores para cada item)
+parent_items = {}  # Diccionario para guardar temporalmente los ítems padres
 for item in treeview_data:
-    treeview.insert(parent=item[0], index=item[1], iid=item[2], text=item[3], values=item[4])
-    if item[0] == "" or item[2] in (8, 12):
-        treeview.item(item[2], open=True)  # Open parents
+    parent = item[0]
+    if parent is None:
+        parent = ""
+    iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+
+    if parent:
+        if parent in parent_items:
+            parent_iid = parent_items[parent]
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+        else:
+            parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+            parent_items[parent] = parent_iid
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+    else:
+        treeview.insert(parent="", index="end", iid=iid, text=item[2], values=item[3])
+        parent_items[parent] = iid
+
+# Abrir todos los ítems padres
+for parent_iid in parent_items.values():
+    treeview.item(parent_iid, open=True)
+
+# Ajustar el tamaño del treeview al número de columnas deseadas
+num_columns_visible = 3  # Número de columnas que deseas mostrar inicialmente
+
+# Configurar el ancho de las columnas
+treeview.column("#0", width=200, stretch=True)  # Primera columna
+for i in range(1, 31):
+    treeview.column(str(i), width=200, stretch=True)
+
+# Ajustar el canvas al tamaño del treeview
+canvas.create_window((0, 0), window=treeview, anchor="nw")
+
+# Función para manejar el evento MouseWheel en el treeview (para desplazamiento vertical en tab_1)
+def on_treeview_mousewheel(event):
+    canvas.yview_scroll(-1 * (event.delta), "units")
+
+# Función para manejar el evento Shift-MouseWheel en el treeview (para desplazamiento horizontal en tab_1)
+def on_treeview_shift_mousewheel(event):
+    # Adjust this factor to control the horizontal scrolling speed
+    horizontal_scroll_speed = 0.1
+    canvas.xview_scroll(-1 * int(horizontal_scroll_speed * event.delta), "units")
+
+# Enlazar el evento MouseWheel en el treeview de tab_1 para desplazamiento vertical
+treeview.bind("<MouseWheel>", on_treeview_mousewheel)
+
+# Enlazar el evento Shift-MouseWheel en el treeview de tab_1 para desplazamiento horizontal
+treeview.bind("<Shift-MouseWheel>", on_treeview_shift_mousewheel)
+
+# Función para ajustar el tamaño del canvas al tamaño del treeview en tab_1
+def on_canvas_configure(event):
+    canvas_width = event.width
+    treeview_width = treeview.winfo_reqwidth()
+    if treeview_width != canvas_width:
+        canvas.itemconfigure(treeview, width=canvas_width)
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+# Ajustar el canvas al tamaño del treeview en tab_1
+canvas.create_window((0, 0), window=treeview, anchor="nw")
+
+# Configurar el canvas para que se desplace con el treeview en tab_1
+treeview.bind("<Configure>", on_canvas_configure)
+
+# Barras de desplazamiento
+treeScrollY = ttk.Scrollbar(tab_1, orient="vertical", command=treeview.yview)
+treeScrollX = ttk.Scrollbar(tab_1, orient="horizontal", command=treeview.xview)
+
+treeview.configure(yscrollcommand=treeScrollY.set, xscrollcommand=treeScrollX.set)
+
+# Ajustar la posición de las barras de desplazamiento
+treeScrollY.pack(side="right", fill="y")
+treeScrollX.pack(side="bottom", fill="x")
+
+# Configurar el canvas para que se desplace con las barras de desplazamiento
+canvas.configure(yscrollcommand=treeScrollY.set, xscrollcommand=treeScrollX.set)
+
+# ...
+
+
 
 
 # Contenido de la pestaña 2
@@ -181,10 +275,10 @@ content_frame_tab_2 = ttk.Frame(canvas_tab_2)
 canvas_tab_2.create_window((0, 0), window=content_frame_tab_2, anchor="nw")
 
 # Ajustar el tamaño del canvas al contenido
-content_frame_tab_2.bind("<Configure>", on_canvas_configure)
+content_frame_tab_2.bind("<Configure>", on_canvas_configure2)
 
 # Asociar evento de scroll del mouse
-canvas_tab_2.bind_all("<MouseWheel>", on_mousewheel)
+canvas_tab_2.bind_all("<MouseWheel>", on_mousewheel2)
 
 # Contenedor principal
 frame_contenedor = ttk.Frame(content_frame_tab_2)
@@ -646,5 +740,7 @@ button2.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nsw")  # Adjust stick
 root.bind('<Configure>', resize)
 entry_list = [globals().get(f"entry{i}") for i in range(0, 51) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
 
-
+# Make the app responsive
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
 root.mainloop()
