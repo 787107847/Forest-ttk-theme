@@ -257,7 +257,7 @@ treeScrollX.pack(side="bottom", fill="x")
 # Configurar el canvas para que se desplace con las barras de desplazamiento
 canvas.configure(yscrollcommand=treeScrollY.set, xscrollcommand=treeScrollX.set)
 
-# ...
+
 
 
 
