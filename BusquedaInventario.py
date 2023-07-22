@@ -3,11 +3,20 @@ from tkinter import ttk
 from tkinter import messagebox
 import uuid
 from conexion import Registro_datos
+from PIL import Image, ImageTk
+
 
 # Create the main application window
 root = tk.Tk()
 root.title("UltraPC")
 root.option_add("*tearOff", False)  # This is always a good idea
+
+# Load the image using PIL
+button_image_pil = Image.open("forest-light/radio-tri-accent.png")  # Replace with the path to your image
+# Resize the image using LANCZOS filter (previously known as ANTIALIAS)
+button_image_pil = button_image_pil.resize((15, 15), Image.LANCZOS)
+# Convert the PIL image to a PhotoImage
+button_image = ImageTk.PhotoImage(button_image_pil)
 
 
 def on_canvas_configure2(event):
@@ -147,7 +156,7 @@ canvas = tk.Canvas(tab_1)
 canvas.pack(fill="both", expand=True)
 
 # Crear el árbol (Treeview)
-treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=20)
+treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
 
 
 # Treeview headings
@@ -179,7 +188,7 @@ treeview_data = []
 for producto in datos_productos:
     treeview_data.extend(transformar_producto(producto))
 
-# Insert treeview data (incluir 10 valores para cada item)
+# Insert treeview data 
 parent_items = {}  # Diccionario para guardar temporalmente los ítems padres
 for item in treeview_data:
     parent = item[0]
@@ -203,13 +212,17 @@ for item in treeview_data:
 for parent_iid in parent_items.values():
     treeview.item(parent_iid, open=True)
 
-# Ajustar el tamaño del treeview al número de columnas deseadas
-num_columns_visible = 3  # Número de columnas que deseas mostrar inicialmente
 
-# Configurar el ancho de las columnas
-treeview.column("#0", width=200, stretch=True)  # Primera columna
+
+# Configurar el ancho de las columnas y centrar el contenido
+treeview.column("#0", width=50, stretch=True, anchor="center")  # Primera columna
 for i in range(1, 31):
-    treeview.column(str(i), width=200, stretch=True)
+    treeview.column("#" + str(i), width=200, stretch=True, anchor="center")  # Ancho y centrado de la columna
+
+# Añadir un botón en cada columna del Treeview
+for i in range(1, 31):
+    treeview.column(f"#{i}", stretch=False)  # Ajustar esta opción para cambiar el ancho de las columnas
+    treeview.heading(f"#{i}", image=button_image)  # Mostrar el botón en la cabecera de la columna
 
 # Ajustar el canvas al tamaño del treeview
 canvas.create_window((0, 0), window=treeview, anchor="nw")
