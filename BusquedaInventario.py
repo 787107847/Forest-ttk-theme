@@ -4,6 +4,7 @@ from tkinter import messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
+from collections import defaultdict
 
 
 # Create the main application window
@@ -214,6 +215,91 @@ for parent_iid in parent_items.values():
 
 
 
+
+
+
+
+
+
+
+
+# Variable para almacenar los ítems seleccionados
+selected_items = []
+
+# Variable para almacenar las variables de selección de cada columna
+selected_vars = {}
+
+# Función para obtener los valores únicos de una columna
+def get_unique_values(col):
+    if 0 <= col < len(treeview_data[0]):
+        unique_values = set(item[col] for item in treeview_data)
+        unique_values.discard('')  # Descartar valores vacíos si existen
+        return unique_values
+    return set()
+
+# Función auxiliar para filtrar el treeview al seleccionar elementos en la lista desplegable
+def filter_treeview():
+    selected_values = {col: var.get() for col, var in selected_vars.items()}
+    if all(val == '' for val in selected_values.values()):
+        items_to_show = treeview_data
+    else:
+        items_to_show = [item for item in treeview_data if all(val in item for col, val in selected_values.items() if val)]
+
+    # Limpiar el treeview actual
+    treeview.delete(*treeview.get_children())
+    parent_items.clear()
+
+    # Re-insertar los elementos que coincidan con los valores seleccionados
+    for item in items_to_show:
+        parent = item[0]
+        if parent is None:
+            parent = ""
+        iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+
+        if parent:
+            if parent in parent_items:
+                parent_iid = parent_items[parent]
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+            else:
+                parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+                parent_items[parent] = parent_iid
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+        else:
+            treeview.insert(parent="", index="end", iid=iid, text=item[2], values=item[3])
+            parent_items[parent] = iid
+# Función para mostrar el menú contextual al hacer clic derecho en la cabecera de una columna
+def show_filter_menu(col):
+    unique_values = get_unique_values(col)
+    if unique_values:
+        # Crear el menú contextual
+        menu = tk.Menu(root, tearoff=0)
+
+        # Agregar cada valor único como una opción del menú
+        for value in unique_values:
+            var = tk.StringVar()
+            menu.add_checkbutton(label=value, onvalue=value, offvalue='', variable=var, command=filter_treeview)
+            selected_vars[col] = var
+
+        # Mostrar el menú contextual en la posición del clic
+        menu.tk_popup(root.winfo_pointerx(), root.winfo_pointery())
+
+    else:
+        # No mostrar el menú si no hay valores únicos en la columna
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Configurar el ancho de las columnas y centrar el contenido
 treeview.column("#0", width=50, stretch=True, anchor="center")  # Primera columna
 for i in range(1, 31):
@@ -222,7 +308,7 @@ for i in range(1, 31):
 # Añadir un botón en cada columna del Treeview
 for i in range(1, 31):
     treeview.column(f"#{i}", stretch=False)  # Ajustar esta opción para cambiar el ancho de las columnas
-    treeview.heading(f"#{i}", image=button_image)  # Mostrar el botón en la cabecera de la columna
+    treeview.heading(f"#{i}", image=button_image, command=lambda col=i: show_filter_menu(col))  # Mostrar el botón en la cabecera de la columna
 
 # Ajustar el canvas al tamaño del treeview
 canvas.create_window((0, 0), window=treeview, anchor="nw")
