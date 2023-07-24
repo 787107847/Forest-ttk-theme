@@ -12,9 +12,9 @@ root.title("UltraPC")
 root.option_add("*tearOff", False)  # This is always a good idea
 
 # Load the image using PIL
-button_image_pil = Image.open("forest-light/radio-tri-accent.png")  # Replace with the path to your image
+button_image_pil = Image.open("forest-light/filtro-de-barras.png")  # Replace with the path to your image
 # Resize the image using LANCZOS filter (previously known as ANTIALIAS)
-button_image_pil = button_image_pil.resize((15, 15), Image.LANCZOS)
+button_image_pil = button_image_pil.resize((12, 12), Image.LANCZOS)
 # Convert the PIL image to a PhotoImage
 button_image = ImageTk.PhotoImage(button_image_pil)
 
