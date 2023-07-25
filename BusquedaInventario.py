@@ -223,11 +223,12 @@ for parent_iid in parent_items.values():
 
 
 
-# Variable para almacenar los ítems seleccionados
-selected_items = []
+
 
 # Variable para almacenar las variables de selección de cada columna
 selected_vars = {}
+
+selected_values = []
 
 
 # Función para obtener los valores únicos de una columna
@@ -244,15 +245,34 @@ def get_unique_values(col):
 
 # Filtrado
 def filter_treeview():
+
+    global selected_vars
+
     selected_values = []
-    lista_absurda = []
-    for var in selected_vars.values():
-        selected_value = var.get()
-        if selected_value != '':
-            selected_values.append(selected_value)
+    for check_vars in selected_vars.values():  # Iterar sobre los diccionarios de variables de control
+        for value, var in check_vars.items():  # Iterar sobre los pares de valor único y variable de control
+            selected_value = var.get()
+            if selected_value == '1':  # Si la opción está seleccionada (marcada)
+                selected_values.append(value)  # Agregar el valor único seleccionado
 
     if not selected_values:
-        items_to_show = treeview_data
+        for item in treeview_data:
+                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
+                if parent is None:
+                    parent = ""
+                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+
+                if parent:
+                    if parent in parent_items:
+                        parent_iid = parent_items[parent]
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+                    else:
+                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+                        parent_items[parent] = parent_iid
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+                else:
+                    treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
+                    parent_items[parent] = iid
     else:
         items_to_show = []
         for item in treeview_data:
@@ -287,6 +307,11 @@ def filter_treeview():
                     treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
                     parent_items[parent] = iid
         else:
+            # Limpiar el treeview actual
+            treeview.delete(*treeview.get_children())
+
+            # Restablecer la estructura parent_items
+            parent_items.clear()
             for item in treeview_data:
                 parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
                 if parent is None:
@@ -310,34 +335,40 @@ def filter_treeview():
         treeview.item(parent_iid, open=True)
 
 
-# Función para mostrar el menú contextual al hacer clic derecho en la cabecera de una columna
-def show_filter_menu(col):
+def show_filter_window(col):
     unique_values = get_unique_values(col)
     if unique_values:
-        # Crear el menú contextual
-        menu = tk.Menu(root, tearoff=0)
+        # Crear la ventana emergente
+        filter_window = tk.Toplevel(root)
+        filter_window.title("Filtrar opciones")
 
-        # Variable de control para la columna actual
-        var_column = tk.StringVar()
+        # Función para aplicar el filtro y cerrar la ventana
+        def apply_filter_and_close():
+            
+            selected_values = [value for value, checked in unique_states.items() if checked.get() == '1']
+            print(selected_values)
+            filter_treeview()
+            filter_window.destroy()
 
-        # Agregar opción "Todos" para deseleccionar la columna
-        menu.add_radiobutton(label="Todos", value='', variable=var_column, command=filter_treeview)
-
-        # Agregar cada valor único como una opción del menú
+        unique_states = {}  # Diccionario para almacenar el valor único y su estado (marcado o no)
         for value in unique_values:
-            menu.add_radiobutton(label=value, value=value, variable=var_column, command=filter_treeview)
+            unique_states[value] = tk.StringVar(value='0')
 
-        # Guardar la variable de control para la columna actual
-        selected_vars[col] = var_column
+        checkbuttons = []  # Lista para almacenar los botones de verificación
+        for value, var in unique_states.items():
+            checkbutton = tk.Checkbutton(filter_window, text=value, variable=var)
+            checkbutton.pack(anchor="w", padx=10)
+            checkbuttons.append(checkbutton)
 
-        # Mostrar el menú contextual en la posición del clic
-        menu.tk_popup(root.winfo_pointerx(), root.winfo_pointery())
+        apply_button = tk.Button(filter_window, text="Aplicar", command=apply_filter_and_close)
+        apply_button.pack(pady=10)
 
-        # Llamar a filter_treeview después de que el usuario seleccione una opción en el menú
-        filter_treeview()
+        filter_window.geometry(f"+{root.winfo_pointerx()}+{root.winfo_pointery()}")
+
+        selected_vars[col] = unique_states
 
     else:
-        # No mostrar el menú si no hay valores únicos en la columna
+        # No mostrar la ventana si no hay valores únicos en la columna
         pass
 
 
@@ -353,14 +384,15 @@ def show_filter_menu(col):
 
 
 # Configurar el ancho de las columnas y centrar el contenido
-treeview.column("#0", width=50, stretch=True, anchor="center")  # Primera columna
+treeview.column("#0", width=50, stretch=True, anchor="center")
+treeview.heading("#0", image=button_image, command=lambda col=i: show_filter_window(col))  # Primera columna
 for i in range(1, 31):
     treeview.column("#" + str(i), width=200, stretch=True, anchor="center")  # Ancho y centrado de la columna
 
 # Añadir un botón en cada columna del Treeview
 for i in range(1, 31):
     treeview.column(f"#{i}", stretch=False)  # Ajustar esta opción para cambiar el ancho de las columnas
-    treeview.heading(f"#{i}", image=button_image, command=lambda col=i: show_filter_menu(col))  # Mostrar el botón en la cabecera de la columna
+    treeview.heading(f"#{i}", image=button_image, command=lambda col=i: show_filter_window(col))  # Mostrar la ventana emergente en la cabecera de la columna
 
 # Ajustar el canvas al tamaño del treeview
 canvas.create_window((0, 0), window=treeview, anchor="nw")
