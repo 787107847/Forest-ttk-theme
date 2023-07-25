@@ -229,7 +229,7 @@ column_filters = {}
 # Variable para almacenar las variables de selección de cada columna
 selected_vars = {}
 
-selected_values = []
+selected_values = {}
 
 
 # Función para obtener los valores únicos de una columna
@@ -244,9 +244,13 @@ def get_unique_values(col):
     unique_values.discard(None)  # Descartar valores vacíos si existen
     return unique_values
 
+# Crear una copia de los datos originales del treeview
+original_treeview_data = treeview_data.copy()
+
 # Filtrado
 def filter_treeview():
     global selected_vars
+    global treeview_data
 
     selected_values = []
     for check_vars in selected_vars.values():  # Iterar sobre los diccionarios de variables de control
@@ -257,13 +261,13 @@ def filter_treeview():
 
     items_to_show = []
     if selected_values:
-        for item in treeview_data:
+        for item in original_treeview_data:  # Usar la copia de los datos originales
             # Verificar si al menos uno de los valores seleccionados está presente en los valores del elemento
             if any(val in item[1][3] for val in selected_values):
                 items_to_show.append(item)
     else:
-        # Si no hay valores seleccionados, mostrar todos los elementos
-        items_to_show = treeview_data
+        # Si no hay valores seleccionados, mostrar todos los elementos originales
+        items_to_show = original_treeview_data
 
     # Limpiar el treeview actual
     treeview.delete(*treeview.get_children())
@@ -290,10 +294,10 @@ def filter_treeview():
             treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
             parent_items[parent] = iid
 
-                        
     # Abrir todos los ítems padres
     for parent_iid in parent_items.values():
         treeview.item(parent_iid, open=True)
+
 
 
 def show_filter_window(col):
