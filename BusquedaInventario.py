@@ -223,7 +223,8 @@ for parent_iid in parent_items.values():
 
 
 
-
+# Crear un diccionario para almacenar los filtros seleccionados para cada columna
+column_filters = {}
 
 # Variable para almacenar las variables de selección de cada columna
 selected_vars = {}
@@ -245,7 +246,6 @@ def get_unique_values(col):
 
 # Filtrado
 def filter_treeview():
-
     global selected_vars
 
     selected_values = []
@@ -255,80 +255,41 @@ def filter_treeview():
             if selected_value == '1':  # Si la opción está seleccionada (marcada)
                 selected_values.append(value)  # Agregar el valor único seleccionado
 
-    if not selected_values:
-        for item in treeview_data:
-                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
-                if parent is None:
-                    parent = ""
-                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
-
-                if parent:
-                    if parent in parent_items:
-                        parent_iid = parent_items[parent]
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
-                    else:
-                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
-                        parent_items[parent] = parent_iid
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
-                else:
-                    treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
-                    parent_items[parent] = iid
-    else:
-        items_to_show = []
+    items_to_show = []
+    if selected_values:
         for item in treeview_data:
             # Verificar si al menos uno de los valores seleccionados está presente en los valores del elemento
             if any(val in item[1][3] for val in selected_values):
-                
                 items_to_show.append(item)
-        lista_absurda = items_to_show
-        # Limpiar el treeview actual
-        treeview.delete(*treeview.get_children())
+    else:
+        # Si no hay valores seleccionados, mostrar todos los elementos
+        items_to_show = treeview_data
 
-        # Restablecer la estructura parent_items
-        parent_items.clear()
+    # Limpiar el treeview actual
+    treeview.delete(*treeview.get_children())
 
-        # Re-insertar los elementos que coincidan con los valores seleccionados
-        if len(lista_absurda) > 0:
-            for index, item in enumerate(lista_absurda, start=1):
-                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
-                if parent is None:
-                    parent = ""
-                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+    # Restablecer la estructura parent_items
+    parent_items.clear()
 
-                if parent:
-                    if parent in parent_items:
-                        parent_iid = parent_items[parent]
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
-                    else:
-                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
-                        parent_items[parent] = parent_iid
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
-                else:
-                    treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
-                    parent_items[parent] = iid
+    # Re-insertar los elementos que coincidan con los valores seleccionados
+    for index, item in enumerate(items_to_show, start=1):
+        parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
+        if parent is None:
+            parent = ""
+        iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+
+        if parent:
+            if parent in parent_items:
+                parent_iid = parent_items[parent]
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+            else:
+                parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+                parent_items[parent] = parent_iid
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
         else:
-            # Limpiar el treeview actual
-            treeview.delete(*treeview.get_children())
+            treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+            parent_items[parent] = iid
 
-            # Restablecer la estructura parent_items
-            parent_items.clear()
-            for item in treeview_data:
-                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
-                if parent is None:
-                    parent = ""
-                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
-
-                if parent:
-                    if parent in parent_items:
-                        parent_iid = parent_items[parent]
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
-                    else:
-                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
-                        parent_items[parent] = parent_iid
-                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
-                else:
-                    treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
-                    parent_items[parent] = iid
                         
     # Abrir todos los ítems padres
     for parent_iid in parent_items.values():
