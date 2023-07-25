@@ -159,7 +159,6 @@ canvas.pack(fill="both", expand=True)
 # Crear el árbol (Treeview)
 treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
 
-
 # Treeview headings
 treeview.heading("#0", text="Item", anchor="center")
 for i in range(1, 31):
@@ -168,8 +167,6 @@ for i in range(1, 31):
     else:
         column_title = " "  # Espacio en blanco si no hay más elementos en la lista
     treeview.heading(str(i), text=column_title, anchor="center")
-
-
 
 # Crear una instancia de la clase Registro_datos
 registro_datos = Registro_datos()
@@ -181,8 +178,9 @@ datos_productos = registro_datos.mostrar_productos()
 def transformar_producto(producto):
     item = producto[0]
     subitem = producto[1]
-    data_values = producto[2:]
-    return (None, "", "Item", ()), (item, "", "", (subitem,) + data_values)
+    data_values = tuple(producto[2:])  # Convertir data_values en una tupla
+    result = (None, "", "Item", ()), (item, "", "", (subitem,) + data_values)
+    yield result
 
 # Crear una lista para almacenar los datos en el formato del treeview
 treeview_data = []
@@ -191,8 +189,9 @@ for producto in datos_productos:
 
 # Insert treeview data 
 parent_items = {}  # Diccionario para guardar temporalmente los ítems padres
+
 for item in treeview_data:
-    parent = item[0]
+    parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
     if parent is None:
         parent = ""
     iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
@@ -200,18 +199,19 @@ for item in treeview_data:
     if parent:
         if parent in parent_items:
             parent_iid = parent_items[parent]
-            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
         else:
             parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
             parent_items[parent] = parent_iid
-            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
     else:
-        treeview.insert(parent="", index="end", iid=iid, text=item[2], values=item[3])
+        treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
         parent_items[parent] = iid
 
 # Abrir todos los ítems padres
 for parent_iid in parent_items.values():
     treeview.item(parent_iid, open=True)
+
 
 
 
@@ -229,44 +229,87 @@ selected_items = []
 # Variable para almacenar las variables de selección de cada columna
 selected_vars = {}
 
+
 # Función para obtener los valores únicos de una columna
 def get_unique_values(col):
-    if 0 <= col < len(treeview_data[0]):
-        unique_values = set(item[col] for item in treeview_data)
-        unique_values.discard('')  # Descartar valores vacíos si existen
-        return unique_values
-    return set()
+    if col == 0:
+        unique_values = set(item[0] for item in treeview_data)
+    elif 0 < col <= len(treeview_data[0][1][3]):
+        unique_values = set(item[1][3][col - 1] for item in treeview_data)
+    else:
+        return set()
 
-# Función auxiliar para filtrar el treeview al seleccionar elementos en la lista desplegable
+    unique_values.discard(None)  # Descartar valores vacíos si existen
+    return unique_values
+
+# Filtrado
 def filter_treeview():
-    selected_values = {col: var.get() for col, var in selected_vars.items()}
-    if all(val == '' for val in selected_values.values()):
+    selected_values = []
+    lista_absurda = []
+    for var in selected_vars.values():
+        selected_value = var.get()
+        if selected_value != '':
+            selected_values.append(selected_value)
+
+    if not selected_values:
         items_to_show = treeview_data
     else:
-        items_to_show = [item for item in treeview_data if all(val in item for col, val in selected_values.items() if val)]
+        items_to_show = []
+        for item in treeview_data:
+            # Verificar si al menos uno de los valores seleccionados está presente en los valores del elemento
+            if any(val in item[1][3] for val in selected_values):
+                
+                items_to_show.append(item)
+        lista_absurda = items_to_show
+        # Limpiar el treeview actual
+        treeview.delete(*treeview.get_children())
 
-    # Limpiar el treeview actual
-    treeview.delete(*treeview.get_children())
-    parent_items.clear()
+        # Restablecer la estructura parent_items
+        parent_items.clear()
 
-    # Re-insertar los elementos que coincidan con los valores seleccionados
-    for item in items_to_show:
-        parent = item[0]
-        if parent is None:
-            parent = ""
-        iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+        # Re-insertar los elementos que coincidan con los valores seleccionados
+        if len(lista_absurda) > 0:
+            for index, item in enumerate(lista_absurda, start=1):
+                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
+                if parent is None:
+                    parent = ""
+                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
 
-        if parent:
-            if parent in parent_items:
-                parent_iid = parent_items[parent]
-                treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
-            else:
-                parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
-                parent_items[parent] = parent_iid
-                treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[2], values=item[3])
+                if parent:
+                    if parent in parent_items:
+                        parent_iid = parent_items[parent]
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+                    else:
+                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+                        parent_items[parent] = parent_iid
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+                else:
+                    treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+                    parent_items[parent] = iid
         else:
-            treeview.insert(parent="", index="end", iid=iid, text=item[2], values=item[3])
-            parent_items[parent] = iid
+            for item in treeview_data:
+                parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
+                if parent is None:
+                    parent = ""
+                iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
+
+                if parent:
+                    if parent in parent_items:
+                        parent_iid = parent_items[parent]
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+                    else:
+                        parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
+                        parent_items[parent] = parent_iid
+                        treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+                else:
+                    treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
+                    parent_items[parent] = iid
+                        
+    # Abrir todos los ítems padres
+    for parent_iid in parent_items.values():
+        treeview.item(parent_iid, open=True)
+
+
 # Función para mostrar el menú contextual al hacer clic derecho en la cabecera de una columna
 def show_filter_menu(col):
     unique_values = get_unique_values(col)
@@ -274,19 +317,28 @@ def show_filter_menu(col):
         # Crear el menú contextual
         menu = tk.Menu(root, tearoff=0)
 
+        # Variable de control para la columna actual
+        var_column = tk.StringVar()
+
+        # Agregar opción "Todos" para deseleccionar la columna
+        menu.add_radiobutton(label="Todos", value='', variable=var_column, command=filter_treeview)
+
         # Agregar cada valor único como una opción del menú
         for value in unique_values:
-            var = tk.StringVar()
-            menu.add_checkbutton(label=value, onvalue=value, offvalue='', variable=var, command=filter_treeview)
-            selected_vars[col] = var
+            menu.add_radiobutton(label=value, value=value, variable=var_column, command=filter_treeview)
+
+        # Guardar la variable de control para la columna actual
+        selected_vars[col] = var_column
 
         # Mostrar el menú contextual en la posición del clic
         menu.tk_popup(root.winfo_pointerx(), root.winfo_pointery())
 
+        # Llamar a filter_treeview después de que el usuario seleccione una opción en el menú
+        filter_treeview()
+
     else:
         # No mostrar el menú si no hay valores únicos en la columna
         pass
-
 
 
 
