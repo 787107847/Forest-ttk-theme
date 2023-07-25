@@ -4,7 +4,6 @@ from tkinter import messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
-from collections import defaultdict
 
 
 # Create the main application window
@@ -151,6 +150,10 @@ titulos_prints_list = [
 # Contenido de la pestaña 1
 tab_1 = ttk.Frame(notebook)
 notebook.add(tab_1, text="Tab 1")
+# Crear el Frame para el botón de resetear
+resetear = tk.Frame(tab_1)
+resetear.pack(side=tk.TOP, fill="x") 
+
 
 # Crear el canvas
 canvas = tk.Canvas(tab_1)
@@ -158,6 +161,7 @@ canvas.pack(fill="both", expand=True)
 
 # Crear el árbol (Treeview)
 treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
+treeview.pack(side=tk.BOTTOM)
 
 # Treeview headings
 treeview.heading("#0", text="Item", anchor="center")
@@ -247,27 +251,27 @@ def get_unique_values(col):
 # Crear una copia de los datos originales del treeview
 original_treeview_data = treeview_data.copy()
 
+# Crear una variable para almacenar los datos filtrados actualizados
+current_treeview_data = original_treeview_data.copy()
+
 # Filtrado
 def filter_treeview():
     global selected_vars
-    global treeview_data
+    global current_treeview_data
 
-    selected_values = []
-    for check_vars in selected_vars.values():  # Iterar sobre los diccionarios de variables de control
-        for value, var in check_vars.items():  # Iterar sobre los pares de valor único y variable de control
-            selected_value = var.get()
-            if selected_value == '1':  # Si la opción está seleccionada (marcada)
-                selected_values.append(value)  # Agregar el valor único seleccionado
+    # Reiniciar los datos filtrados cada vez que se ejecute desde cero
+    if not any(selected_vars.values()):
+        current_treeview_data = original_treeview_data.copy()
 
-    items_to_show = []
-    if selected_values:
-        for item in original_treeview_data:  # Usar la copia de los datos originales
-            # Verificar si al menos uno de los valores seleccionados está presente en los valores del elemento
-            if any(val in item[1][3] for val in selected_values):
-                items_to_show.append(item)
-    else:
-        # Si no hay valores seleccionados, mostrar todos los elementos originales
-        items_to_show = original_treeview_data
+    # Aplicar los filtros sucesivamente
+    for check_vars in selected_vars.values():
+        selected_values = [value for value, var in check_vars.items() if var.get() == '1']
+        if selected_values:
+            filtered_data = []
+            for item in current_treeview_data:
+                if any(val in item[1][3] for val in selected_values):
+                    filtered_data.append(item)
+            current_treeview_data = filtered_data
 
     # Limpiar el treeview actual
     treeview.delete(*treeview.get_children())
@@ -275,8 +279,8 @@ def filter_treeview():
     # Restablecer la estructura parent_items
     parent_items.clear()
 
-    # Re-insertar los elementos que coincidan con los valores seleccionados
-    for index, item in enumerate(items_to_show, start=1):
+    # Re-insertar los elementos filtrados en el treeview
+    for index, item in enumerate(current_treeview_data, start=1):
         parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
         if parent is None:
             parent = ""
@@ -297,6 +301,7 @@ def filter_treeview():
     # Abrir todos los ítems padres
     for parent_iid in parent_items.values():
         treeview.item(parent_iid, open=True)
+
 
 
 
@@ -335,8 +340,15 @@ def show_filter_window(col):
     else:
         # No mostrar la ventana si no hay valores únicos en la columna
         pass
+def reset_treeview():
+    global selected_vars
 
+    selected_vars.clear()
+    filter_treeview()
 
+# Agregar el botón al Frame
+reset_button = tk.Button(resetear, text="Resetear", command=reset_treeview)
+reset_button.pack(side=tk.LEFT, padx=10)
 
 
 
