@@ -4,7 +4,7 @@ from tkinter import messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
-
+import decimal
 
 # Create the main application window
 root = tk.Tk()
@@ -160,7 +160,7 @@ canvas = tk.Canvas(tab_1)
 canvas.pack(fill="both", expand=True)
 
 # Crear el árbol (Treeview)
-treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
+treeview = ttk.Treeview(canvas, selectmode="extended", columns=("#0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
 treeview.pack(side=tk.BOTTOM)
 
 # Treeview headings
@@ -223,10 +223,6 @@ for parent_iid in parent_items.values():
 
 
 
-
-
-
-
 # Crear un diccionario para almacenar los filtros seleccionados para cada columna
 column_filters = {}
 
@@ -235,18 +231,39 @@ selected_vars = {}
 
 selected_values = {}
 
+current_treeview_data = []
+# Variable para indicar si es la primera vez que se llama a la función
+is_first_call = True
 
 # Función para obtener los valores únicos de una columna
 def get_unique_values(col):
-    if col == 0:
-        unique_values = set(item[0] for item in treeview_data)
-    elif 0 < col <= len(treeview_data[0][1][3]):
-        unique_values = set(item[1][3][col - 1] for item in treeview_data)
-    else:
-        return set()
+    global is_first_call
 
-    unique_values.discard(None)  # Descartar valores vacíos si existen
+    if is_first_call:
+        if col == 0:
+            print("SÍ")
+            unique_values = set(item[1][0] for item in treeview_data)
+        elif 0 < col <= len(treeview_data[0][1][3]):
+            unique_values = set(item[1][3][col - 1] for item in treeview_data)
+        else:
+            return set()
+    else:
+        if col == 0:
+            print("SÍ")
+            unique_values = set(item[1][0] for item in current_treeview_data)
+        elif 0 < col <= len(treeview_data[0][1][3]):
+            unique_values = set(item[1][3][col - 1] for item in current_treeview_data)
+        else:
+            return set()
+
+    # Descartar valores vacíos si existen
+    unique_values.discard(None)
+
+    # Actualizar la bandera para indicar que ya se ha llamado a la función al menos una vez
+    is_first_call = False
+
     return unique_values
+
 
 # Crear una copia de los datos originales del treeview
 original_treeview_data = treeview_data.copy()
@@ -255,7 +272,7 @@ original_treeview_data = treeview_data.copy()
 current_treeview_data = original_treeview_data.copy()
 
 # Filtrado
-def filter_treeview():
+def filter_treeview(col):
     global selected_vars
     global current_treeview_data
 
@@ -269,8 +286,12 @@ def filter_treeview():
         if selected_values:
             filtered_data = []
             for item in current_treeview_data:
-                if any(val in item[1][3] for val in selected_values):
-                    filtered_data.append(item)
+                if(col == 0):
+                   if item[1][0] in selected_values:
+                        filtered_data.append(item)
+                else:
+                    if (any(val in item[1][3] for val in selected_values)):
+                        filtered_data.append(item)
             current_treeview_data = filtered_data
 
     # Limpiar el treeview actual
@@ -302,6 +323,22 @@ def filter_treeview():
     for parent_iid in parent_items.values():
         treeview.item(parent_iid, open=True)
 
+    # Actualizar valores únicos y estados de checkbuttons
+    for col in selected_vars:
+        unique_values = get_unique_values(col)
+        if unique_values:
+            selected_var = selected_vars[col]
+            for value in selected_var:
+                if value not in unique_values:
+                    selected_var[value].set('0')
+            update_filter_window_values(col, unique_values)
+
+def update_filter_window_values(col, unique_values):
+    if col in selected_vars:
+        selected_var = selected_vars[col]
+        for value in unique_values:
+            if value not in selected_var:
+                selected_var[value] = tk.StringVar(value='0')
 
 
 
@@ -314,10 +351,8 @@ def show_filter_window(col):
 
         # Función para aplicar el filtro y cerrar la ventana
         def apply_filter_and_close():
-            
             selected_values = [value for value, checked in unique_states.items() if checked.get() == '1']
-            print(selected_values)
-            filter_treeview()
+            filter_treeview(col)
             filter_window.destroy()
 
         unique_states = {}  # Diccionario para almacenar el valor único y su estado (marcado o no)
@@ -340,11 +375,20 @@ def show_filter_window(col):
     else:
         # No mostrar la ventana si no hay valores únicos en la columna
         pass
+
+
+def update_checkbuttons_state():
+    for col, selected_states in selected_vars.items():
+        unique_values = get_unique_values(col)
+        for value, var in selected_states.items():
+            if value not in unique_values:
+                var.set('0')
+
 def reset_treeview():
     global selected_vars
 
     selected_vars.clear()
-    filter_treeview()
+    filter_treeview(1)
 
 # Agregar el botón al Frame
 reset_button = tk.Button(resetear, text="Resetear", command=reset_treeview)
@@ -362,7 +406,7 @@ reset_button.pack(side=tk.LEFT, padx=10)
 
 # Configurar el ancho de las columnas y centrar el contenido
 treeview.column("#0", width=50, stretch=True, anchor="center")
-treeview.heading("#0", image=button_image, command=lambda col=i: show_filter_window(col))  # Primera columna
+treeview.heading("#0", image=button_image, command=lambda col=0: show_filter_window(col))  # Primera columna
 for i in range(1, 31):
     treeview.column("#" + str(i), width=200, stretch=True, anchor="center")  # Ancho y centrado de la columna
 
