@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
@@ -17,6 +16,20 @@ button_image_pil = Image.open("forest-light/filtro-de-barras.png")  # Replace wi
 button_image_pil = button_image_pil.resize((12, 12), Image.LANCZOS)
 # Convert the PIL image to a PhotoImage
 button_image = ImageTk.PhotoImage(button_image_pil)
+
+# Load the image using PIL
+button_image_2 = Image.open("forest-light/cerrar.png")  # Replace with the path to your image
+# Resize the image using LANCZOS filter (previously known as ANTIALIAS)
+button_image_2 = button_image_2.resize((12, 12), Image.LANCZOS)
+# Convert the PIL image to a PhotoImage
+button_image2 = ImageTk.PhotoImage(button_image_2)
+
+# Load the image using PIL
+button_image_3 = Image.open("forest-light/comprobar.png")  # Replace with the path to your image
+# Resize the mage using LANCZOS filter (previously known as ANTIALIAS)
+button_image_3 = button_image_3.resize((12, 12), Image.LANCZOS)
+# Convert the PIL image to a PhotoImage
+button_image3= ImageTk.PhotoImage(button_image_3)
 
 
 def on_canvas_configure2(event):
@@ -178,6 +191,7 @@ registro_datos = Registro_datos()
 # Llamar al método mostrar_productos usando la instancia creada
 datos_productos = registro_datos.mostrar_productos()
 
+
 # Define una función para transformar los datos del producto en el formato adecuado
 def transformar_producto(producto):
     item = producto[0]
@@ -191,8 +205,10 @@ treeview_data = []
 for producto in datos_productos:
     treeview_data.extend(transformar_producto(producto))
 
-# Insert treeview data 
+# Insertar treeview data
 parent_items = {}  # Diccionario para guardar temporalmente los ítems padres
+
+vacio = False
 
 for item in treeview_data:
     parent = item[1][0]  # Acceder al primer elemento de la segunda tupla
@@ -200,17 +216,38 @@ for item in treeview_data:
         parent = ""
     iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
 
+    
+    cell_data = list(item[1][3])  # Convertir los datos de la celda en una lista modificable
+    """
+    for i in range(len(cell_data)):
+        if cell_data[i] is None:
+            cell_data[i] = button_image2
+    """
+
+
     if parent:
         if parent in parent_items:
             parent_iid = parent_items[parent]
-            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=cell_data)
         else:
             parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
             parent_items[parent] = parent_iid
-            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=item[1][3])
+            treeview.insert(parent=parent_iid, index="end", iid=iid, text=item[1][2], values=cell_data)
     else:
-        treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=item[1][3])
+        treeview.insert(parent="", index="end", iid=iid, text=item[1][2], values=cell_data)
         parent_items[parent] = iid
+
+    # Configurar el icono para los valores None
+    for i, cell_value in enumerate(item[1][3]):
+        if cell_value is None:
+            vacio = True
+        
+    if(vacio):
+        treeview.item(iid, image=button_image2, values=cell_data)  # Asignar el icono solo para el ítem específico
+    else:
+        treeview.item(iid, image=button_image3, values=cell_data)  # Asignar el icono solo para el ítem específico
+
+
 
 # Abrir todos los ítems padres
 for parent_iid in parent_items.values():
@@ -243,6 +280,7 @@ is_first_call = True
 # Función para obtener los valores únicos de una columna
 def get_unique_values(col):
     global is_first_call
+    global vacio
 
     if is_first_call:
         if col == 0:
@@ -288,17 +326,16 @@ def filter_treeview(col):
         print(selected_values)
         if selected_values:
             filtered_data = []
-            if(col != 0):
+            if col != 0:
                 for item in current_treeview_data:
                     if any(str(val) in str(item[1][3]) for val in selected_values):
                         filtered_data.append(item)
-                current_treeview_data = filtered_data
             else:
                 for item in current_treeview_data:
-                    if any(str(val) in str(item[1][0]) for val in str(selected_values)):
+                    if any(str(val) in str(item[1][0]) for val in selected_values):
                         filtered_data.append(item)
-                current_treeview_data = filtered_data
 
+            current_treeview_data = filtered_data
 
     # Limpiar el treeview actual
     treeview.delete(*treeview.get_children())
@@ -313,17 +350,27 @@ def filter_treeview(col):
             parent = ""
         iid = str(uuid.uuid4())  # Generar un iid único para cada ítem
 
+        cell_data = list(item[1][3])  # Convertir los datos de la celda en una lista modificable
+        vacio = any(cell_value is None for cell_value in cell_data)  # Verificar si hay valores None
+
         if parent:
             if parent in parent_items:
                 parent_iid = parent_items[parent]
-                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{item[1][2]}", values=cell_data)
             else:
                 parent_iid = treeview.insert(parent="", index="end", iid=parent, text=parent)
                 parent_items[parent] = parent_iid
-                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+                treeview.insert(parent=parent_iid, index="end", iid=iid, text=f"{item[1][2]}", values=cell_data)
         else:
-            treeview.insert(parent="", index="end", iid=iid, text=f"{index}. {item[1][2]}", values=item[1][3])
+            treeview.insert(parent="", index="end", iid=iid, text=f"{item[1][2]}", values=cell_data)
             parent_items[parent] = iid
+
+        # Configurar el icono para los valores None
+        if vacio:
+            treeview.item(iid, image=button_image2, values=cell_data)  # Asignar el icono para el ítem específico
+        else:
+            treeview.item(iid, image=button_image3, values=cell_data)  # Asignar el icono para el ítem específico
+
 
     # Abrir todos los ítems padres
     for parent_iid in parent_items.values():
@@ -490,6 +537,32 @@ canvas.configure(yscrollcommand=treeScrollY.set, xscrollcommand=treeScrollX.set)
 # Contenido de la pestaña 2
 tab_2 = ttk.Frame(notebook)
 notebook.add(tab_2, text="Tab 2")
+
+
+placeholder_list = [
+    'N° Item', 'Fecha de fabricación', 'Stock', 'Costo', 'Proveedor', 'N° de serie',
+    'Capacidad', 'Tipo', 'Frecuencia', 'Posición (M)', 'Maximo de ram', 'Marca',
+    'Linea', 'Modelo', 'N° producto', 'Tipo Almacenamiento', 'Capacidad',
+    'Factor de forma', 'Especificación', 'Horas de uso', 'Nombre Procesador',
+    'Núcleos', 'Generación', 'Velocidad CPU', 'Marca',
+    'Linea', 'Modelo', 'Capacidad', 'Tipo batería', 'Extendida', 'Capacidad Batería',
+    '% Uso', 'Táctil', 'Tamaño de Pantalla', 'Resolución Pantalla', 'Panel',
+    'Hercios Pantalla', 'Inclinación de pantalla', 'Antirreflejo', 'Idioma Teclado',
+    'Retroiluminado', 'Numérico', 'TouchPad', 'Lector de Huella', 'Cantidad puertos USB',
+    'Cantidad puertos Tipo C', 'Unidad Óptica', 'Ranura SD', 'Puerto Dock', 'Puerto Ethernet',
+    'Puerto HDMI', 'Puerto H-Jack', 'Puerto VGA', 'Puerto Display', 'Webcam',
+    'Posición Webcam', 'Descripción Webcam', 'Cargador Original', 'Alimentación de Cargador',
+    'Accesorios', 'Material de Construcción', 'Cumple norma STD',
+    'Peso', 'Wifi', 'BlueTooth', '4G', 'Ancho', 'Largo', 'Alto', 'Peso de la caja',
+    'Apto para envío', 'Oferente Garantía', 'Tiempo de garantía', 'Tipo Garantía',
+    'Comprobante de compra', 'Comentario Garantía', 'Condición', 'Condición Touch',
+    'Condición Teclado', 'Condición Reposamuñecas', 'Condición Tapa', 'Condición Pantalla',
+    'Otros comentarios'
+]
+
+
+
+
 
 # Crear canvas para la pestaña 2
 canvas_tab_2 = tk.Canvas(tab_2)
@@ -889,33 +962,33 @@ spinbox8 = ttk.Spinbox(input_valor_14, from_=0, to=100, width=18)
 spinbox8.insert(0, "Peso de la caja")
 spinbox8.grid(row=3, column=0, padx=(5,0), pady=(5,0), sticky="ew")
 
-entry40 = ttk.Entry(input_valor_14, width=15)
-entry40.insert(0, "Apto para envío")
-entry40.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry44 = ttk.Entry(input_valor_14, width=15)
+entry44.insert(0, "Apto para envío")
+entry44.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
 input_valor_15 = ttk.LabelFrame(frame_contenedor, text="Garantía", padding=(20, 10))
 label_frames.append(input_valor_15)
 
-entry41 = ttk.Entry(input_valor_15, width=15)
-entry41.insert(0, "Oferente Garantía")
-entry41.grid(row=0, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry45 = ttk.Entry(input_valor_15, width=15)
+entry45.insert(0, "Oferente Garantía")
+entry45.grid(row=0, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 spinbox9 = ttk.Spinbox(input_valor_15, from_=0, to=100, width=18)
 spinbox9.insert(0, "Tiempo de garantía")
 spinbox9.grid(row=1, column=0, padx=(5,0), pady=(5,0), sticky="ew")
 
-entry42 = ttk.Entry(input_valor_15, width=15)
-entry42.insert(0, "Tipo Garantía")
-entry42.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry46 = ttk.Entry(input_valor_15, width=15)
+entry46.insert(0, "Tipo Garantía")
+entry46.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry43 = ttk.Entry(input_valor_15, width=15)
-entry43.insert(0, "Comprobante de compra")
-entry43.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry47 = ttk.Entry(input_valor_15, width=15)
+entry47.insert(0, "Comprobante de compra")
+entry47.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry44 = ttk.Entry(input_valor_15, width=15)
-entry44.insert(0, "Comentario Garantía")
-entry44.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry48 = ttk.Entry(input_valor_15, width=15)
+entry48.insert(0, "Comentario Garantía")
+entry48.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
 input_valor_16 = ttk.LabelFrame(frame_contenedor, text="Condición", padding=(20, 10))
@@ -925,29 +998,29 @@ combobox6 = ttk.Combobox(input_valor_16, values=combo_list8)
 combobox6.current(0)
 combobox6.grid(row=0, column=0,padx=(5,1), pady=(0, 0), sticky="ew")
 
-entry46 = ttk.Entry(input_valor_16, width=15)
-entry46.insert(0, "Condición Touch")
-entry46.grid(row=1, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
-
-entry47 = ttk.Entry(input_valor_16, width=15)
-entry47.insert(0, "Condición Teclado")
-entry47.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
-
-entry48 = ttk.Entry(input_valor_16, width=15)
-entry48.insert(0, "Condición Reposamuñecas")
-entry48.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
-
 entry49 = ttk.Entry(input_valor_16, width=15)
-entry49.insert(0, "Condición Tapa")
-entry49.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry49.insert(0, "Condición Touch")
+entry49.grid(row=1, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 entry50 = ttk.Entry(input_valor_16, width=15)
-entry50.insert(0, "Condición Pantalla")
-entry50.grid(row=5, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry50.insert(0, "Condición Teclado")
+entry50.grid(row=2, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
-entry51 = ttk.Entry(input_valor_16, width=20)
-entry51.insert(0, "Otros comentarios")
-entry51.grid(row=6, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+entry51 = ttk.Entry(input_valor_16, width=15)
+entry51.insert(0, "Condición Reposamuñecas")
+entry51.grid(row=3, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry52 = ttk.Entry(input_valor_16, width=15)
+entry52.insert(0, "Condición Tapa")
+entry52.grid(row=4, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry53 = ttk.Entry(input_valor_16, width=15)
+entry53.insert(0, "Condición Pantalla")
+entry53.grid(row=5, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
+
+entry54 = ttk.Entry(input_valor_16, width=20)
+entry54.insert(0, "Otros comentarios")
+entry54.grid(row=6, column=0,padx=(5, 1), pady=(0, 0), sticky="ew")
 
 # Frame para Ingreso de Valores de la máquina
 button_1 = ttk.LabelFrame(frame_contenedor, text="Botones", padding=(10, 5))
@@ -963,7 +1036,8 @@ button2.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nsw")  # Adjust stick
 
 # Asociar el evento de cambio de tamaño de la ventana a la función resize
 root.bind('<Configure>', resize)
-entry_list = [globals().get(f"entry{i}") for i in range(0, 51) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
+entry_list = [globals().get(f"entry{i}") for i in range(0, 56) if isinstance(globals().get(f"entry{i}"), ttk.Entry)]
+
 
 # Make the app responsive
 root.columnconfigure(0, weight=1)
