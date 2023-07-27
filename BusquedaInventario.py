@@ -295,7 +295,7 @@ def filter_treeview(col):
                 current_treeview_data = filtered_data
             else:
                 for item in current_treeview_data:
-                    if any(val in str(item[1][0]) for val in str(selected_values)):
+                    if any(str(val) in str(item[1][0]) for val in str(selected_values)):
                         filtered_data.append(item)
                 current_treeview_data = filtered_data
 
@@ -348,6 +348,10 @@ def show_filter_window(col):
             filter_treeview(col)
             filter_window.destroy()
 
+        # Función para seleccionar todos los valores
+        def select_all_options():
+            options_listbox.select_set(0, tk.END)
+
         unique_states = {}  # Diccionario para almacenar el valor único y su estado (marcado o no)
         for value in unique_values:
             unique_states[value] = tk.StringVar(value='0')
@@ -382,17 +386,23 @@ def show_filter_window(col):
 
         search_entry_var.trace_add("write", filter_options)
 
+        # Botón "Seleccionar Todo"
+        select_all_button = tk.Button(filter_window, text="Seleccionar Todo", command=select_all_options)
+        select_all_button.pack(pady=5)
+
         # Botón para aplicar el filtro
         apply_button = tk.Button(filter_window, text="Aplicar", command=apply_filter_and_close)
         apply_button.pack(pady=10)
 
-        filter_window.geometry(f"+{root.winfo_pointerx()}+{root.winfo_pointery()}")
+        filter_window.geometry(f"+{root.winfo_rootx() + root.winfo_width() // 2 - 150}+{root.winfo_rooty() + root.winfo_height() // 2 - 150}")
 
         selected_vars[col] = unique_states
 
     else:
         # No mostrar la ventana si no hay valores únicos en la columna
         pass
+
+
 
 
 def reset_treeview():
