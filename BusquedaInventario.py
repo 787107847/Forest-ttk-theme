@@ -4,7 +4,7 @@ from tkinter import messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
-import decimal
+
 
 # Create the main application window
 root = tk.Tk()
@@ -160,7 +160,7 @@ canvas = tk.Canvas(tab_1)
 canvas.pack(fill="both", expand=True)
 
 # Crear el árbol (Treeview)
-treeview = ttk.Treeview(canvas, selectmode="extended", columns=("#0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
+treeview = ttk.Treeview(canvas, selectmode="extended", columns=("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"), height=26)
 treeview.pack(side=tk.BOTTOM)
 
 # Treeview headings
@@ -223,6 +223,10 @@ for parent_iid in parent_items.values():
 
 
 
+
+
+
+
 # Crear un diccionario para almacenar los filtros seleccionados para cada columna
 column_filters = {}
 
@@ -231,8 +235,9 @@ selected_vars = {}
 
 selected_values = {}
 
-current_treeview_data = []
-# Variable para indicar si es la primera vez que se llama a la función
+selected_items = []
+
+# Variable para indicar si es la primera vez que se llama a la función de filtrado
 is_first_call = True
 
 # Función para obtener los valores únicos de una columna
@@ -241,7 +246,6 @@ def get_unique_values(col):
 
     if is_first_call:
         if col == 0:
-            print("SÍ")
             unique_values = set(item[1][0] for item in treeview_data)
         elif 0 < col <= len(treeview_data[0][1][3]):
             unique_values = set(item[1][3][col - 1] for item in treeview_data)
@@ -249,7 +253,6 @@ def get_unique_values(col):
             return set()
     else:
         if col == 0:
-            print("SÍ")
             unique_values = set(item[1][0] for item in current_treeview_data)
         elif 0 < col <= len(treeview_data[0][1][3]):
             unique_values = set(item[1][3][col - 1] for item in current_treeview_data)
@@ -263,7 +266,6 @@ def get_unique_values(col):
     is_first_call = False
 
     return unique_values
-
 
 # Crear una copia de los datos originales del treeview
 original_treeview_data = treeview_data.copy()
@@ -282,17 +284,21 @@ def filter_treeview(col):
 
     # Aplicar los filtros sucesivamente
     for check_vars in selected_vars.values():
-        selected_values = [value for value, var in check_vars.items() if var.get() == '1']
+        selected_values = [value for value, var in check_vars.items() if str(value) in str(selected_items)]
+        print(selected_values)
         if selected_values:
             filtered_data = []
-            for item in current_treeview_data:
-                if(col == 0):
-                   if item[1][0] in selected_values:
+            if(col != 0):
+                for item in current_treeview_data:
+                    if any(str(val) in str(item[1][3]) for val in selected_values):
                         filtered_data.append(item)
-                else:
-                    if (any(val in item[1][3] for val in selected_values)):
+                current_treeview_data = filtered_data
+            else:
+                for item in current_treeview_data:
+                    if any(val in str(item[1][0]) for val in str(selected_values)):
                         filtered_data.append(item)
-            current_treeview_data = filtered_data
+                current_treeview_data = filtered_data
+
 
     # Limpiar el treeview actual
     treeview.delete(*treeview.get_children())
@@ -323,26 +329,11 @@ def filter_treeview(col):
     for parent_iid in parent_items.values():
         treeview.item(parent_iid, open=True)
 
-    # Actualizar valores únicos y estados de checkbuttons
-    for col in selected_vars:
-        unique_values = get_unique_values(col)
-        if unique_values:
-            selected_var = selected_vars[col]
-            for value in selected_var:
-                if value not in unique_values:
-                    selected_var[value].set('0')
-            update_filter_window_values(col, unique_values)
-
-def update_filter_window_values(col, unique_values):
-    if col in selected_vars:
-        selected_var = selected_vars[col]
-        for value in unique_values:
-            if value not in selected_var:
-                selected_var[value] = tk.StringVar(value='0')
 
 
 
 def show_filter_window(col):
+    global selected_items
     unique_values = get_unique_values(col)
     if unique_values:
         # Crear la ventana emergente
@@ -351,7 +342,9 @@ def show_filter_window(col):
 
         # Función para aplicar el filtro y cerrar la ventana
         def apply_filter_and_close():
-            selected_values = [value for value, checked in unique_states.items() if checked.get() == '1']
+            global selected_items
+            selected_values = [value for value in options_listbox.curselection()]
+            selected_items = [options_listbox.get(index) for index in selected_values]
             filter_treeview(col)
             filter_window.destroy()
 
@@ -359,12 +352,37 @@ def show_filter_window(col):
         for value in unique_values:
             unique_states[value] = tk.StringVar(value='0')
 
-        checkbuttons = []  # Lista para almacenar los botones de verificación
-        for value, var in unique_states.items():
-            checkbutton = tk.Checkbutton(filter_window, text=value, variable=var)
-            checkbutton.pack(anchor="w", padx=10)
-            checkbuttons.append(checkbutton)
+        # Cuadro de entrada de texto (Entry Box) para búsqueda
+        search_entry = tk.Entry(filter_window)
+        search_entry.pack(pady=10)
+        search_entry_var = tk.StringVar()
+        search_entry.config(textvariable=search_entry_var)
 
+        # Frame para mostrar las opciones filtradas con desplazamiento vertical
+        frame = tk.Frame(filter_window, height=200)
+        frame.pack(padx=10, pady=5)
+
+        # Configurar el desplazamiento vertical con la rueda del mouse
+        scrollbar = tk.Scrollbar(frame, orient=tk.VERTICAL)
+        options_listbox = tk.Listbox(frame, yscrollcommand=scrollbar.set, selectmode=tk.MULTIPLE)
+        scrollbar.config(command=options_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        options_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        for value, var in unique_states.items():
+            options_listbox.insert(tk.END, value)
+
+        # Función para filtrar opciones a medida que se escribe en el cuadro de búsqueda
+        def filter_options(*args):
+            search_text = search_entry_var.get()
+            options_listbox.delete(0, tk.END)
+            for value in unique_states:
+                if search_text.lower() in str(value).lower():
+                    options_listbox.insert(tk.END, value)
+
+        search_entry_var.trace_add("write", filter_options)
+
+        # Botón para aplicar el filtro
         apply_button = tk.Button(filter_window, text="Aplicar", command=apply_filter_and_close)
         apply_button.pack(pady=10)
 
@@ -376,13 +394,6 @@ def show_filter_window(col):
         # No mostrar la ventana si no hay valores únicos en la columna
         pass
 
-
-def update_checkbuttons_state():
-    for col, selected_states in selected_vars.items():
-        unique_values = get_unique_values(col)
-        for value, var in selected_states.items():
-            if value not in unique_values:
-                var.set('0')
 
 def reset_treeview():
     global selected_vars
