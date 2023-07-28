@@ -569,6 +569,7 @@ for i in range(len(label_frames_values)):
         for a in range(0,6):
             lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i],values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+            lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<<ComboboxSelected>>")
 
             # Agregar el Combobox a la lista correspondiente
@@ -576,8 +577,9 @@ for i in range(len(label_frames_values)):
             automatizador+=1
     elif(automatizador == 6 or automatizador == 15 or automatizador==39 or automatizador==44 or automatizador ==49 or automatizador ==66 or automatizador==71 ):
         for a in range(0,5):
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], textvariable=placeholder_list[automatizador], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+            lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<<ComboboxSelected>>")
 
             # Agregar el Combobox a la lista correspondiente
@@ -585,17 +587,19 @@ for i in range(len(label_frames_values)):
             automatizador+=1
     elif(automatizador==11 or automatizador == 20 or automatizador==24 or automatizador==28):
         for a in range(0,4):
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], textvariable=placeholder_list[automatizador], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+            lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<<ComboboxSelected>>")
 
             # Agregar el Combobox a la lista correspondiente
             comboboxes.append(lista_letras_c[automatizador])
             automatizador+=1
-    elif(automatizador==32 or automatizador>=75):
+    elif(automatizador==32 or automatizador==76):
         for a in range(0,7):
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], textvariable=placeholder_list[automatizador], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
+            lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<<ComboboxSelected>>")
 
             # Agregar el Combobox a la lista correspondiente
