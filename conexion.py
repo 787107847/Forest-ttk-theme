@@ -37,94 +37,77 @@ class Registro_datos():
         registros = cursor.fetchall()
         return registros
     
+import mysql.connector
 
-    def rellenar_productos(self):
-        # Campos de la lista proporcionada
+class Registro_datos():
+    def __init__(self):
+        self.conexion = mysql.connector.connect(host='localhost', database='ultrapc', user='root', password='95781432365zZ@', port='3306')
+
+    def obtener_datos_unicos(self):
+        # Crear una lista con los nombres de los campos y las tablas a las que pertenecen
         campos = [
-            # Lista de campos con las tablas correspondientes (tabla, campo)
-            ('i', 'item'),
-            ('e', 'fechaFabricacion'),
-            ('e', 'stock'),
-            ('i', 'costo'),
-            ('pr', 'nombre'),
-            ('ns', 'numeroSerie'),
-            ('r', 'capacidadRam'),
-            ('r', 'tipoRam'),
-            ('r', 'frecuencia'),
-            ('r', 'disposicion'),
-            ('e', 'capacidadRamTotal'),
-            ('m', 'nombreMarca'),
-            ('m', 'lineaMarca'),
-            ('md', 'nombreModelo'),
-            ('np', 'numeroProducto'),
-            ('at', 'Tipo'),
-            ('a', 'capacidad'),
-            ('a', 'factorForma'),
-            ('ae', 'Especificacion'),
-            ('e','horasEncendido'),
-            ('p', 'nombreProcesador'),  # Agregamos el campo "nombreProcesador" de "PROCESADOR"
-            ('p', 'nucleosProcesador'),  # Agregamos el campo "nucleosProcesador" de "PROCESADOR"
-            ('p', 'generacionProcesador'),  # Agregamos el campo "generacionProcesador" de "PROCESADOR"
-            ('p', 'velProcesador'),  # Agregamos el campo "velProcesador" de "PROCESADOR"
-            ('pa', 'tamannoPantalla'),
-            ('pa', 'resolucionPantalla'),
-            ('t', 'idiomaTeclado'),
-            ('t', 'retroiluminado'),
-            ('pt', 'puertoCD'),
-            ('pt', 'puertoSd'),
-            ('pt', 'puertoDock'),
-            ('pt', 'puertoEthernet'),
-            ('pt', 'puertoHDMI'),
-            ('pt', 'puertoHjack'),
-            ('pt', 'puertoVGA'),
-            ('pt', 'puertoDisplay'),
-            ('pt', 'cantidadUsb'),
-            ('pt', 'cantidadTypeC')
+            # Tabla ITEM
+            ('ITEM', 'item', 'descripcion'),
+            ('ITEM', 'costo',),
+            # Tabla ECOMPUTO
+            ('ECOMPUTO', 'stock',),
+            # Tabla PROVEEDOR
+            ('PROVEEDOR', 'nombre',),
+            # Tabla NUMERO_SERIE
+            ('NUMERO_SERIE', 'numeroSerie',),
+            # Tabla RAM
+            ('RAM', 'capacidadRam', 'tipoRam', 'frecuencia', 'disposicion'),
+            # Tabla ECOMPUTO
+            ('ECOMPUTO', 'capacidadRamTotal',),
+            # Tabla MARCA
+            ('MARCA', 'nombreMarca', 'lineaMarca'),
+            # Tabla MODELO
+            ('MODELO', 'nombreModelo',),
+            # Tabla NUMERO_PRODUCTO
+            ('NUMERO_PRODUCTO', 'numeroProducto',),
+            # Tabla ALMACENAMIENTO_TIPO
+            ('ALMACENAMIENTO_TIPO', 'Tipo',),
+            # Tabla ALMACENAMIENTO
+            ('ALMACENAMIENTO', 'capacidad', 'factorForma'),
+            # Tabla ALMACENAMIENTO_ESPECIFICACION
+            ('ALMACENAMIENTO_ESPECIFICACION', 'Especificacion',),
+            # Tabla PROCESADOR
+            ('PROCESADOR', 'nombreProcesador', 'nucleosProcesador', 'generacionProcesador', 'velProcesador')
         ]
 
-        # Construir la lista de campos para la consulta SQL
-        campos_sql = ', '.join([f'{tabla}.{campo}' for tabla, campo in campos])
+        # Inicializar un diccionario para almacenar los resultados
+        datos_unicos = {}
 
-        # Subconsulta para obtener los datos únicos de RAM
-        subconsulta_ram = """
-            SELECT DISTINCT r.tipoRam, r.frecuencia, r.capacidadRam, r.disposicion
-            FROM RAM r
-        """
-
-        # Consulta SQL
-        sql = f"""
-        SELECT {campos_sql}, GROUP_CONCAT(DISTINCT pr.nombre) AS proveedores
-        FROM ECOMPUTO e
-        LEFT JOIN ITEM i ON e.item = i.item
-        LEFT JOIN ECOMPUTO_REPOSICION erp ON e.item = erp.item
-        LEFT JOIN REPOSICION_STOCK rs ON erp.idReposicion = rs.idReposicion
-        LEFT JOIN PROVEEDOR pr ON rs.idProveedor = pr.idProveedor
-        LEFT JOIN MARCA m ON e.idMarca = m.idMarca
-        LEFT JOIN MODELO md ON e.idModelo = md.idModelo
-        LEFT JOIN NUMERO_PRODUCTO np ON e.idNumeroProducto = np.idNumeroProducto
-        LEFT JOIN PROCESADOR p ON e.idProcesador = p.idProcesador  -- Agregamos el JOIN con PROCESADOR
-        LEFT JOIN NUMERO_SERIE ns ON e.item = ns.item
-        LEFT JOIN ECOMPUTO_ALMACENAMIENTO ea ON e.item = ea.item
-        LEFT JOIN ALMACENAMIENTO a ON ea.idAlmacenamiento = a.idAlmacenamiento
-        LEFT JOIN ECOMPUTO_RAM er ON e.item = er.item
-        LEFT JOIN RAM r ON er.idRam = r.idRam
-        LEFT JOIN ECOMPUTO_PANTALLA ep ON e.item = ep.item
-        LEFT JOIN PANTALLA pa ON ep.idPantalla = pa.idPantalla
-        LEFT JOIN TECLADO t ON e.idTeclado = t.idTeclado
-        LEFT JOIN PUERTOS pt ON e.idPuerto = pt.idPuerto
-        LEFT JOIN ALMACENAMIENTO_TIPO at ON a.idTipo = at.idTipo
-        LEFT JOIN ALMACENAMIENTO_ESPECIFICACION ae ON a.idEspecificacion = ae.idEspecificacion
-        LEFT JOIN ({subconsulta_ram}) sub_ram ON r.tipoRam = sub_ram.tipoRam
-                                                AND r.frecuencia = sub_ram.frecuencia
-                                                AND r.capacidadRam = sub_ram.capacidadRam
-                                                AND r.disposicion = sub_ram.disposicion
-        GROUP BY e.item, {', '.join([f'{tabla}.{campo}' for tabla, campo in campos if tabla == 'i'])}
-        """
-
+        # Realizar consultas para obtener datos únicos de cada campo
         cursor = self.conexion.cursor()
-        cursor.execute(sql)
-        registros = cursor.fetchall()
-        return registros
+        for tabla, *campos_tabla in campos:
+            for campo in campos_tabla:
+                # Construir la consulta SQL para obtener los valores únicos
+                consulta_sql = f"SELECT DISTINCT {campo} FROM {tabla};"
+                cursor.execute(consulta_sql)
+                resultados = cursor.fetchall()
+
+                # Agregar los resultados al diccionario
+                if campo not in datos_unicos:
+                    datos_unicos[campo] = []
+                for resultado in resultados:
+                    datos_unicos[campo].append(resultado[0])
+
+        # Cerrar el cursor y retornar los datos únicos
+        cursor.close()
+        return datos_unicos
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

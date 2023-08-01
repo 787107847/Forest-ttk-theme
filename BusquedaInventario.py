@@ -572,24 +572,22 @@ registro_datos = Registro_datos()
 datos_productos = registro_datos.rellenar_productos()
 
 # Lista de nombres de campos en la base de datos
-valores_bd = ['item', 'fechaFabricacion', 'stock', 'costo', 'nombreMarca', 'numeroSerie', 'capacidad', 'factorForma',
-              'tipoRam', 'frecuencia', 'tamannoPantalla', 'resolucionPantalla', 'idiomaTeclado', 'retroiluminado',
-              'puertoCD', 'puertoSd', 'puertoDock', 'puertoEthernet', 'puertoHDMI', 'puertoHjack', 'puertoVGA',
-              'puertoDisplay', 'cantidadUsb', 'cantidadTypeC']
+#valores_bd = ['au{}'.format(i) for i in range(1, 12)]
+
 
 # Diccionario para almacenar los datos por campo
 datos_por_campo = {}
 
 # Crear un diccionario por cada campo en valores_bd
-for campo in valores_bd:
+#for campo in valores_bd:
     # Obtener el índice del campo en datos_productos
-    indice_campo = valores_bd.index(campo)
+    #indice_campo = valores_bd.index(campo)
     
     # Crear una lista con los valores correspondientes a ese campo
-    valores_campo = [registro[indice_campo] for registro in datos_productos]
+    #valores_campo = [registro[indice_campo] for registro in datos_productos]
     
     # Almacenar la lista de valores en el diccionario con el campo como clave
-    datos_por_campo[campo] = valores_campo
+    #datos_por_campo[campo] = valores_campo
 
 
 
@@ -615,7 +613,7 @@ for i in range(len(label_frames_values)):
     if(automatizador == 0 or automatizador==54 or automatizador == 60):
         for a in range(0,6):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=datos_por_campo[valores_bd[automatizador]]) if automatizador < 24 else ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
@@ -626,7 +624,7 @@ for i in range(len(label_frames_values)):
     elif(automatizador == 6 or automatizador == 15 or automatizador==39 or automatizador==44 or automatizador ==49 or automatizador ==66 or automatizador==71 ):
         for a in range(0,5):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=datos_por_campo[valores_bd[automatizador]]) if automatizador < 24 else ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
@@ -637,7 +635,7 @@ for i in range(len(label_frames_values)):
     elif(automatizador==11 or automatizador == 20 or automatizador==24 or automatizador==28):
         for a in range(0,4):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=datos_por_campo[valores_bd[automatizador]]) if automatizador < 24 else ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
@@ -648,7 +646,7 @@ for i in range(len(label_frames_values)):
     elif(automatizador==32 or automatizador==76):
         for a in range(0,7):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=datos_por_campo[valores_bd[automatizador]]) if automatizador < 24 else ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
