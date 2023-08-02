@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import uuid
 from conexion import Registro_datos
 from PIL import Image, ImageTk
+from decimal import Decimal
 
 
 # Create the main application window
@@ -501,8 +502,8 @@ placeholder_list = [
     'Capacidad', 'Tipo', 'Frecuencia', 'Posición (M)', 'Maximo de ram', 'Marca',
     'Linea', 'Modelo', 'N° producto', 'Tipo Almacenamiento', 'Capacidad',
     'Factor de forma', 'Especificación', 'Horas de uso', 'Nombre Procesador',
-    'Núcleos', 'Generación', 'Velocidad CPU', 'Marca',
-    'Linea', 'Modelo', 'Capacidad', 'Tipo batería', 'Extendida', 'Capacidad Batería',
+    'Núcleos', 'Generación', 'Velocidad CPU', 'Nombre Grafica',
+    'Capacidad', 'Tipo Vram', 'Integrada', 'Tipo batería', 'Extendida', 'Capacidad Batería',
     '% Uso', 'Táctil', 'Tamaño de Pantalla', 'Resolución Pantalla', 'Panel',
     'Hercios Pantalla', 'Inclinación de pantalla', 'Antirreflejo', 'Idioma Teclado',
     'Retroiluminado', 'Numérico', 'TouchPad', 'Lector de Huella', 'Cantidad puertos USB',
@@ -526,10 +527,6 @@ label_frames_names =['c{}'.format(i) for i in range(1, 17)]
 
 lista_letras_c = ['cg{}'.format(i) for i in range(1, 84)]
 
-valores_bd = ['item', 'fechaFabricacion', 'stock', 'costo', 'nombreMarca', 'numeroSerie', 'capacidad', 'factorForma',
-           'tipoRam', 'frecuencia', 'tamannoPantalla', 'resolucionPantalla', 'idiomaTeclado', 'retroiluminado',
-           'puertoCD', 'puertoSd', 'puertoDock', 'puertoEthernet', 'puertoHDMI', 'puertoHjack', 'puertoVGA',
-           'puertoDisplay', 'cantidadUsb', 'cantidadTypeC']
 
 
 
@@ -569,25 +566,53 @@ automatizador = 0
 registro_datos = Registro_datos()
 
 # Llamar al método mostrar_productos usando la instancia creada
-datos_productos = registro_datos.rellenar_productos()
+datos_productos = registro_datos.obtener_datos_unicos()
 
 # Lista de nombres de campos en la base de datos
-#valores_bd = ['au{}'.format(i) for i in range(1, 12)]
+valores_bd = [
+    'item',
+    'fechaFabricacion', 'stock',
+    'precio',
+    'nombre',
+    'numeroSerie',
+    'capacidadRam', 'tipoRam', 'frecuencia', 'disposicion',
+    'capacidadRamTotal',
+    'nombreMarca', 'lineaMarca',
+    'nombreModelo',
+    'numeroProducto',
+    'Tipo',
+    'capacidad', 'factorForma',
+    'Especificacion', 'horasEncendido',
+    'nombreProcesador', 'nucleosProcesador', 'generacionProcesador', 'velProcesador',
+    'nomGrafica', 'capacidadGrafica', 'tipoVram', 'integrada',
+    'tipoBateria', 'extendida', 'capacidadBateria', 'usoBateria',
+    'tactil', 'tamannoPantalla', 'resolucionPantalla', 'panel', 'hzPantalla', 'inclinacionPantalla', 'antirreflejo',
+    'idiomaTeclado', 'retroiluminado', 'esNumerico',
+    'touchpad', 'lectorHuellas',
+    'cantidadUsb', 'cantidadTypeC', 'puertoCD', 'puertoSd', 'puertoDock', 'puertoEthernet', 'puertoHDMI', 'puertoHjack', 'puertoVGA', 'puertoDisplay',
+    'webCam', 'pocicionWebCam', 'descripcionWebCam',
+    'original', 'alimentacion', 'accesorios',
+    'descripcionMaterial', 'milStd', 'peso', 'wifi', 'bt', '4G',
+    'anchoCaja', 'longitudCaja', 'altoCaja', 'pesoCaja', 'aptoEnvio',
+    'oferenteGarantia', 'tiempoGarantia', 'tipoGarantia', 'comprobantedeCompra', 'comentarioGarantia',
+    'estetica', 'eTouch', 'eTeclado', 'eReposa', 'eTapa', 'ePantalla', 'eOtros'
+]
 
+# Crear un diccionario para almacenar los Comboboxes por nombre de campo
+comboboxes_por_campo = {}
 
-# Diccionario para almacenar los datos por campo
+# Crear un nuevo diccionario para almacenar los datos por campo
 datos_por_campo = {}
 
-# Crear un diccionario por cada campo en valores_bd
-#for campo in valores_bd:
-    # Obtener el índice del campo en datos_productos
-    #indice_campo = valores_bd.index(campo)
-    
-    # Crear una lista con los valores correspondientes a ese campo
-    #valores_campo = [registro[indice_campo] for registro in datos_productos]
+# Iterar sobre las claves del diccionario datos_productos
+for campo in datos_productos:
+    # Obtener la lista de valores para el campo actual
+    valores_campo = datos_productos[campo]
     
     # Almacenar la lista de valores en el diccionario con el campo como clave
-    #datos_por_campo[campo] = valores_campo
+    datos_por_campo[campo] = valores_campo
+
+
 
 
 
@@ -602,6 +627,22 @@ def on_combobox_focus_in(event):
     if event.widget.get() == placeholder_text:
         event.widget.set("")
 
+# Convertir todos los valores de datos_por_campo a cadenas
+datos_por_campo_str = {campo: [str(val) for val in valores] for campo, valores in datos_por_campo.items()}
+
+def on_combobox_keyrelease(event, campo):
+    # Obtener el Combobox actual
+    combobox = comboboxes_por_campo[campo]
+    
+    # Obtener el texto ingresado por el usuario
+    text = combobox.get()
+
+    # Filtrar los valores originales para obtener las coincidencias del campo actual
+    valores_coincidentes = [val for val in datos_por_campo_str[campo] if text.lower() in val.lower()]
+
+    # Actualizar los valores del Combobox con las coincidencias
+    combobox['values'] = valores_coincidentes
+
 # Crear y configurar los LabelFrames y Comboboxes
 for i in range(len(label_frames_values)):
     # Crear el LabelFrame
@@ -613,10 +654,14 @@ for i in range(len(label_frames_values)):
     if(automatizador == 0 or automatizador==54 or automatizador == 60):
         for a in range(0,6):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i])
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
+            datos_por_campo[valores_bd[automatizador]].insert(0,lista_letras_c[automatizador].get())
+            lista_letras_c[automatizador]['values'] = values=datos_por_campo[valores_bd[automatizador]]
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
+            lista_letras_c[automatizador].bind("<KeyRelease>", lambda event, campo=valores_bd[automatizador]: on_combobox_keyrelease(event, campo))
+            comboboxes_por_campo[valores_bd[automatizador]] = lista_letras_c[automatizador]
 
             # Agregar el Combobox a la lista correspondiente
             comboboxes.append(lista_letras_c[automatizador])
@@ -624,10 +669,14 @@ for i in range(len(label_frames_values)):
     elif(automatizador == 6 or automatizador == 15 or automatizador==39 or automatizador==44 or automatizador ==49 or automatizador ==66 or automatizador==71 ):
         for a in range(0,5):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i])
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
+            datos_por_campo[valores_bd[automatizador]].insert(0,lista_letras_c[automatizador].get())
+            lista_letras_c[automatizador]['values'] = values=datos_por_campo[valores_bd[automatizador]]
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
+            lista_letras_c[automatizador].bind("<KeyRelease>", lambda event, campo=valores_bd[automatizador]: on_combobox_keyrelease(event, campo))
+            comboboxes_por_campo[valores_bd[automatizador]] = lista_letras_c[automatizador]
 
             # Agregar el Combobox a la lista correspondiente
             comboboxes.append(lista_letras_c[automatizador])
@@ -635,10 +684,14 @@ for i in range(len(label_frames_values)):
     elif(automatizador==11 or automatizador == 20 or automatizador==24 or automatizador==28):
         for a in range(0,4):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i])
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
+            datos_por_campo[valores_bd[automatizador]].insert(0,lista_letras_c[automatizador].get())
+            lista_letras_c[automatizador]['values'] = values=datos_por_campo[valores_bd[automatizador]]
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
+            lista_letras_c[automatizador].bind("<KeyRelease>", lambda event, campo=valores_bd[automatizador]: on_combobox_keyrelease(event, campo))
+            comboboxes_por_campo[valores_bd[automatizador]] = lista_letras_c[automatizador]
 
             # Agregar el Combobox a la lista correspondiente
             comboboxes.append(lista_letras_c[automatizador])
@@ -646,29 +699,125 @@ for i in range(len(label_frames_values)):
     elif(automatizador==32 or automatizador==76):
         for a in range(0,7):
             # Crear el Combobox con los valores correspondientes al campo
-            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i], values=combo_list)
+            lista_letras_c[automatizador] = ttk.Combobox(label_frames_names[i])
             lista_letras_c[automatizador].grid(row=a, column=0, padx=(5, 1), pady=(0, 0), sticky="ew")
             lista_letras_c[automatizador].set(placeholder_list[automatizador])
+            datos_por_campo[valores_bd[automatizador]].insert(0,lista_letras_c[automatizador].get())
+            lista_letras_c[automatizador]['values'] = values=datos_por_campo[valores_bd[automatizador]]
             lista_letras_c[automatizador].bind("<FocusIn>", on_combobox_focus_in)
+            lista_letras_c[automatizador].bind("<KeyRelease>", lambda event, campo=valores_bd[automatizador]: on_combobox_keyrelease(event, campo))
+            comboboxes_por_campo[valores_bd[automatizador]] = lista_letras_c[automatizador]
 
             # Agregar el Combobox a la lista correspondiente
             comboboxes.append(lista_letras_c[automatizador])
             automatizador += 1
 
 
+def on_entry_focus_in(event, entry, placeholder_text):
+    if entry.get() == placeholder_text:
+        entry.delete(0, tk.END)
+        entry.config(foreground='black')
+
+def on_entry_focus_out(event, entry, placeholder_text):
+    if entry.get() == '':
+        entry.insert(0, placeholder_text)
+        entry.config(foreground='grey')
+
+def on_entry1_keyrelease(event):
+    if entry1.get().strip():  # Verificar si el campo no está vacío
+        entry2.config(state=tk.DISABLED)  # Bloquear el segundo Entry
+    else:
+        entry2.config(state=tk.NORMAL)  # Desbloquear el segundo Entry
+
+def on_entry2_keyrelease(event):
+    if entry2.get().strip():  # Verificar si el campo no está vacío
+        entry1.config(state=tk.DISABLED)  # Bloquear el primer Entry
+    else:
+        entry1.config(state=tk.NORMAL)  # Desbloquear el primer Entry
+
+def obtener_valores_item():
+    # Obtener el número de item ingresado por el usuario
+    numero_item = entry1.get()
+
+    # Verificar si el número de item es válido
+    if numero_item:
+        # Obtener los valores del número de item usando el método de la clase Registro_datos
+        valores_item = registro_datos.obtener_valores_item(numero_item)
+
+        # Verificar si los valores son válidos
+        if valores_item:
+            print(valores_item)
+            for campo, combobox in comboboxes_por_campo.items():
+                # Obtener el valor correspondiente del diccionario valores_item
+                valor = valores_item.get(campo)
+
+                # Verificar si el valor es None y asignar una lista vacía si es el caso
+                if valor is None:
+                    valor = []
+
+                # Convertir el valor en una lista con un solo elemento si es un entero o un decimal
+                if isinstance(valor, int) or isinstance(valor, Decimal):
+                    valor = [valor]
+                # Convertir el valor en una lista con un solo elemento si es un string
+                elif isinstance(valor, str):
+                    valor = [valor]
+
+                # Verificar si la lista tiene elementos antes de establecer el valor en el Combobox
+                if valor:
+                    combobox.set(valor[0])
+        else:
+            # Si el número de item no existe en la base de datos, mostrar un mensaje de error
+            messagebox.showerror("Error", "El número de item ingresado no existe en la base de datos.")
+    else:
+        # Si no se ingresó ningún número de item, mostrar un mensaje de error
+        messagebox.showerror("Error", "Ingrese un número de item válido.")
+
 
 
 
 # Frame para Ingreso de Valores de la máquina
-button_1 = ttk.LabelFrame(frame_contenedor, text="Botones", padding=(10, 5))
-label_frames.append(button_1)
+busquedas = ttk.LabelFrame(frame_contenedor, text="Búsquedas", padding=(10, 5))
+label_frames.append(busquedas)
+
+placeholder_text = ["N° de item", "N° de producto"]
+
+# Entry 1
+entry1 = ttk.Entry(busquedas)
+entry1.insert(0, placeholder_text[0])
+entry1.config(foreground='grey')
+entry1.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="nse")
+
+# Asociar eventos para el marcador de posición
+entry1.bind('<FocusIn>', lambda event: on_entry_focus_in(event, entry1, placeholder_text[0]))
+entry1.bind('<FocusOut>', lambda event: on_entry_focus_out(event, entry1, placeholder_text[0]))
+
+# Entry 2
+entry2 = ttk.Entry(busquedas)
+entry2.insert(0, placeholder_text[1])
+entry2.config(foreground='grey')
+entry2.grid(row=1, column=0, padx=5, pady=(0, 10), sticky="nse")
+
+# Asociar eventos para el marcador de posición
+entry2.bind('<FocusIn>', lambda event: on_entry_focus_in(event, entry2, placeholder_text[1]))
+entry2.bind('<FocusOut>', lambda event: on_entry_focus_out(event, entry2, placeholder_text[1]))
+
+# Asociar eventos para el bloqueo de Entries
+entry1.bind('<KeyRelease>', on_entry1_keyrelease)
+entry2.bind('<KeyRelease>', on_entry2_keyrelease)
 
 # Button widget
-button1 = ttk.Button(button_1, text="Validar")
-button1.grid(row=0, column=0, padx=5, pady=(0, 0), sticky="nse")  # Adjust sticky
+button1 = ttk.Button(busquedas, text="Buscar", command=obtener_valores_item)
+button1.grid(row=2, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
 
-button2 = ttk.Button(button_1, text="Guardar")
-button2.grid(row=0, column=1, padx=5, pady=(0, 0), sticky="nsw")  # Adjust sticky
+# Button widget
+button2 = ttk.Button(busquedas, text="Validar")
+button2.grid(row=3, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
+
+button3 = ttk.Button(busquedas, text="Guardar")
+button3.grid(row=4, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
+
+
+
 
 
 

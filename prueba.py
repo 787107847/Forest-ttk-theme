@@ -46,4 +46,3 @@ for producto in datos_productos:
     print(f"Cantidad de Puertos TypeC: {producto[30]}")
 
     imprimir_linea_separadora()
-
