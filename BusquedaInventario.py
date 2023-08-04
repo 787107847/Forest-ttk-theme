@@ -281,7 +281,6 @@ def filter_treeview(col):
     # Aplicar los filtros sucesivamente
     for check_vars in selected_vars.values():
         selected_values = [value for value, var in check_vars.items() if str(value) in str(selected_items)]
-        print(selected_values)
         if selected_values:
             filtered_data = []
             if col != 0:
@@ -735,42 +734,76 @@ def on_entry2_keyrelease(event):
     else:
         entry1.config(state=tk.NORMAL)  # Desbloquear el primer Entry
 
-def obtener_valores_item():
+def obtener_valores():
     # Obtener el número de item ingresado por el usuario
     numero_item = entry1.get()
+    numero_producto = entry2.get()
 
-    # Verificar si el número de item es válido
-    if numero_item:
-        # Obtener los valores del número de item usando el método de la clase Registro_datos
-        valores_item = registro_datos.obtener_valores_item(numero_item)
+    if(numero_item == "N° de item"):
+            # Verificar si el número de producto es válido
+        if numero_producto.isdigit():
+            # Obtener los valores del número de item usando el método de la clase Registro_datos
+            valores_producto = registro_datos.obtener_valores_producto(numero_producto)
 
-        # Verificar si los valores son válidos
-        if valores_item:
-            print(valores_item)
-            for campo, combobox in comboboxes_por_campo.items():
-                # Obtener el valor correspondiente del diccionario valores_item
-                valor = valores_item.get(campo)
+            # Verificar si los valores son válidos
+            if valores_producto:
+                for campo, combobox in comboboxes_por_campo.items():
 
-                # Verificar si el valor es None y asignar una lista vacía si es el caso
-                if valor is None:
-                    valor = []
+                    # Obtener el valor correspondiente del diccionario valores_item
+                    valor = valores_producto.get(campo)
 
-                # Convertir el valor en una lista con un solo elemento si es un entero o un decimal
-                if isinstance(valor, int) or isinstance(valor, Decimal):
-                    valor = [valor]
-                # Convertir el valor en una lista con un solo elemento si es un string
-                elif isinstance(valor, str):
-                    valor = [valor]
+                    # Verificar si el valor es None y asignar una lista vacía si es el caso
+                    if valor is None:
+                        valor = combobox['values'][0]
 
-                # Verificar si la lista tiene elementos antes de establecer el valor en el Combobox
-                if valor:
-                    combobox.set(valor[0])
+                    # Convertir el valor en una lista con un solo elemento si es un entero o un decimal
+                    if isinstance(valor, int) or isinstance(valor, Decimal):
+                        valor = [valor]
+                    # Convertir el valor en una lista con un solo elemento si es un string
+                    elif isinstance(valor, str):
+                        valor = [valor]
+
+                    # Verificar si la lista tiene elementos antes de establecer el valor en el Combobox
+                    if valor:
+                        combobox.set(valor[0])
+            else:
+                # Si el número de item no existe en la base de datos, mostrar un mensaje de error
+                messagebox.showerror("Error", "El número de item ingresado no existe en la base de datos.")
         else:
-            # Si el número de item no existe en la base de datos, mostrar un mensaje de error
-            messagebox.showerror("Error", "El número de item ingresado no existe en la base de datos.")
+            # Si no se ingresó ningún número de item, mostrar un mensaje de error
+            messagebox.showerror("Error", "Ingrese un número de item válido.")
+
     else:
-        # Si no se ingresó ningún número de item, mostrar un mensaje de error
-        messagebox.showerror("Error", "Ingrese un número de item válido.")
+        # Verificar si el número de item es válido
+        if numero_item.isdigit():
+            # Obtener los valores del número de item usando el método de la clase Registro_datos
+            valores_item = registro_datos.obtener_valores_item(numero_item)
+
+            # Verificar si los valores son válidos
+            if valores_item:
+                for campo, combobox in comboboxes_por_campo.items():
+                    # Obtener el valor correspondiente del diccionario valores_item
+                    valor = valores_item.get(campo)
+
+                    # Verificar si el valor es None y asignar una lista vacía si es el caso
+                    if valor is None:
+                        valor = combobox['values'][0]
+                    # Convertir el valor en una lista con un solo elemento si es un entero o un decimal
+                    if isinstance(valor, int) or isinstance(valor, Decimal):
+                        valor = [valor]
+                    # Convertir el valor en una lista con un solo elemento si es un string
+                    elif isinstance(valor, str):
+                        valor = [valor]
+
+                    # Verificar si la lista tiene elementos antes de establecer el valor en el Combobox
+                    if valor:
+                        combobox.set(valor[0])
+            else:
+                # Si el número de item no existe en la base de datos, mostrar un mensaje de error
+                messagebox.showerror("Error", "El número de item ingresado no existe en la base de datos.")
+        else:
+            # Si no se ingresó ningún número de item, mostrar un mensaje de error
+            messagebox.showerror("Error", "Ingrese un número de item válido.")
 
 
 
@@ -806,7 +839,7 @@ entry1.bind('<KeyRelease>', on_entry1_keyrelease)
 entry2.bind('<KeyRelease>', on_entry2_keyrelease)
 
 # Button widget
-button1 = ttk.Button(busquedas, text="Buscar", command=obtener_valores_item)
+button1 = ttk.Button(busquedas, text="Buscar", command=obtener_valores)
 button1.grid(row=2, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
 
 # Button widget
