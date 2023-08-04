@@ -28,7 +28,7 @@ button_image2 = ImageTk.PhotoImage(button_image_2)
 # Load the image using PIL
 button_image_3 = Image.open("forest-light/comprobar.png")  # Replace with the path to your image
 # Resize the mage using LANCZOS filter (previously known as ANTIALIAS)
-button_image_3 = button_image_3.resize((12, 12), Image.LANCZOS)
+button_image_3 = button_image_3.resize((25, 25), Image.LANCZOS)
 # Convert the PIL image to a PhotoImage
 button_image3= ImageTk.PhotoImage(button_image_3)
 
@@ -642,6 +642,10 @@ def on_combobox_keyrelease(event, campo):
     # Actualizar los valores del Combobox con las coincidencias
     combobox['values'] = valores_coincidentes
 
+imagensumar = ['img{}'.format(i) for i in range(1,5)]
+
+
+
 # Crear y configurar los LabelFrames y Comboboxes
 for i in range(len(label_frames_values)):
     # Crear el LabelFrame
@@ -711,6 +715,79 @@ for i in range(len(label_frames_values)):
             comboboxes.append(lista_letras_c[automatizador])
             automatizador += 1
 
+    # Agregar botón en los LabelFrames con índices 1, 3, 5, 6 y 14
+    if i in [1, 3, 5, 6, 14]:  
+        a=str(i)
+        # Crear un botón pequeño
+        a = ttk.Button(label_frames_names[i],  text="Añadir Otro", command=lambda lf=label_frames_names[i]: abrir_ventana_nueva(lf))
+
+        # Posicionar el botón en la parte inferior del LabelFrame
+        a.grid(row=5, column=0, padx=5, pady=(8,0), sticky="ns")
+
+        # Puedes agregar una función que se ejecute cuando se haga clic en el botón aquí
+        # boton.config(command=lambda: tu_funcion())
+
+
+
+def abrir_ventana_nueva(label_frame_original):
+    # Crear una nueva ventana (toplevel) que será del mismo tamaño que el LabelFrame original
+    ventana_nueva = tk.Toplevel()
+    ventana_nueva.title("Nueva " + label_frame_original["text"])
+
+    # Obtener la posición actual de la ventana raíz
+    root = label_frame_original.winfo_toplevel()
+    root.update_idletasks()  # Asegurarse de que todas las tareas pendientes se completen
+    root_x = root.winfo_x()
+    root_y = root.winfo_y()
+
+    # Obtener el tamaño de la nueva ventana
+    ventana_nueva.update_idletasks()  # Asegurarse de que todas las tareas pendientes se completen
+    ventana_nueva_width = ventana_nueva.winfo_width()
+    ventana_nueva_height = ventana_nueva.winfo_height()
+
+    # Calcular la posición de la nueva ventana en el centro de la ventana raíz
+    x = root_x + (root.winfo_width() - ventana_nueva_width) // 2
+    y = root_y + (root.winfo_height() - ventana_nueva_height) // 2
+
+    # Mover la nueva ventana a la posición calculada
+    ventana_nueva.geometry(f"+{x}+{y}")
+
+    # Crear un nuevo LabelFrame en la nueva ventana con el mismo texto que el original
+    label_frame_nuevo = ttk.LabelFrame(ventana_nueva, text=label_frame_original["text"], padding=(20, 10))
+    label_frame_nuevo.grid(row=0, column=0, padx=10, pady=10)
+
+    def guardar_datos_y_cerrar():
+        # Preguntar al usuario si los datos son correctos
+        confirmar = messagebox.askyesno("Confirmar", "¿Son correctos los datos?")
+
+        if confirmar:
+            # Función para guardar los datos (puedes agregar el código necesario para guardar los datos aquí)
+            # Mostrar mensaje con el resultado del guardado
+            messagebox.showinfo("Éxito", "Sus datos han sido guardados.")
+
+            # Cerrar la nueva ventana
+            ventana_nueva.destroy()
+
+    # Replicar los Comboboxes y sus datos en el nuevo LabelFrame
+    for widget in label_frame_original.winfo_children():
+
+        if isinstance(widget, ttk.Combobox):
+            # Crear un nuevo Combobox en el LabelFrame nuevo con los mismos valores y configuraciones
+            nuevo_combobox = ttk.Combobox(label_frame_nuevo, values=widget["values"])
+            nuevo_combobox.set(widget.get())
+            nuevo_combobox.grid(row=widget.grid_info()["row"], column=widget.grid_info()["column"], padx=5, pady=5, sticky="ew")
+            nuevo_boton = ttk.Button(label_frame_nuevo, text="Guardar",command=guardar_datos_y_cerrar)
+            nuevo_boton.grid(row=7, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
+            # Hacer que la nueva ventana obtenga el foco y no permitir interacción con la ventana principal
+            ventana_nueva.grab_set()
+        elif isinstance(widget, ttk.Button):
+            # Omitir el botón "Añadir" para evitar duplicados
+            continue
+        else:
+            # Otros widgets (si los hubiera) se pueden replicar aquí
+            pass
+
+
 
 def on_entry_focus_in(event, entry, placeholder_text):
     if entry.get() == placeholder_text:
@@ -768,10 +845,10 @@ def obtener_valores():
                         combobox.set(valor[0])
             else:
                 # Si el número de item no existe en la base de datos, mostrar un mensaje de error
-                messagebox.showerror("Error", "El número de item ingresado no existe en la base de datos.")
+                messagebox.showerror("Error", "El número de producto ingresado no existe en la base de datos.")
         else:
             # Si no se ingresó ningún número de item, mostrar un mensaje de error
-            messagebox.showerror("Error", "Ingrese un número de item válido.")
+            messagebox.showerror("Error", "Ingrese un número de producto válido.")
 
     else:
         # Verificar si el número de item es válido
@@ -842,11 +919,38 @@ entry2.bind('<KeyRelease>', on_entry2_keyrelease)
 button1 = ttk.Button(busquedas, text="Buscar", command=obtener_valores)
 button1.grid(row=2, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
 
+def validar_comboboxes():
+    for combobox in comboboxes:
+        try:
+            if combobox.get() == '' or combobox.get() == combobox['values'][0]:
+                combobox.state(['invalid'])
+            else:
+                combobox.state(['!invalid'])
+        except:
+            if combobox.get() == '':
+                combobox.state(['invalid'])
+            else:
+                combobox.state(['!invalid'])
+    
+
 # Button widget
-button2 = ttk.Button(busquedas, text="Validar")
+button2 = ttk.Button(busquedas, text="Validar", command=validar_comboboxes)
 button2.grid(row=3, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
 
-button3 = ttk.Button(busquedas, text="Guardar")
+def obtener_datos_comboboxes():
+    confirmar = messagebox.askyesno("Confirmar", "¿Son correctos los datos?")
+    if confirmar:
+        datos_comboboxes = []
+        for combobox in comboboxes:
+            valor_combobox = combobox.get()
+            datos_comboboxes.append(valor_combobox)
+            registro = Registro_datos()
+            registro.insertar_datos(datos_comboboxes)
+        messagebox.showinfo("Éxito", "Sus datos han sido guardados.")
+
+    
+
+button3 = ttk.Button(busquedas, text="Guardar", command=obtener_datos_comboboxes)
 button3.grid(row=4, column=0, padx=5, pady=(0, 8), sticky="ns")  # Adjust sticky
 
 

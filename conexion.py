@@ -4,6 +4,10 @@ class Registro_datos():
     def __init__(self):
         self.conexion = mysql.connector.connect(host='localhost', database='ultrapc', user='root', password='95781432365zZ@', port='3306')
 
+    def cerrar_conexion(self):
+        self.cursor.close()
+        self.conexion.close()
+    
     def mostrar_productos(self):
         cursor = self.conexion.cursor()
         sql = """
@@ -644,6 +648,18 @@ class Registro_datos():
         else:
             return None
 
+    def insertar_datos(self, datos):
+            try:
+                columnas = ', '.join(datos.keys())
+                valores = ', '.join(['%s'] * len(datos))
+                sql = f'INSERT INTO {tabla} ({columnas}) VALUES ({valores})'
+                self.cursor.execute(sql, tuple(datos.values()))
+                self.conexion.commit()
+                return True
+            except Exception as e:
+                print(f"Error al insertar en la tabla {tabla}: {e}")
+                self.conexion.rollback()
+                return False
 
 
 
