@@ -649,6 +649,10 @@ class Registro_datos():
             return None
 
     def insertar_datos(self, datos):
+        
+            
+        
+
             try:
                 columnas = ', '.join(datos.keys())
                 valores = ', '.join(['%s'] * len(datos))
